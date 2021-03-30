@@ -1,10 +1,11 @@
 from common.gAPI import GoogleAPI
 import pandas as pd
-from scrapEd import ScrapData
+from Edelweiss.scrapEd import ScrapData
 from common.common import CommonFunctions
 from common.sheetOperations import SheetOps
 import time
-import edleConfig
+import Edelweiss.edleConfig as edleConfig
+import os
 
 class ProcessEd:
     def __init__(self):
@@ -104,18 +105,18 @@ class ProcessEd:
                 folderID = self.objGAPI.createFolder(service, str(dt), '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
             # Scrap Data
             file = self.objScrap.start_scraping(str(symbol), dt)
-            name_of_file = file.split('/')[1]
+            name_of_file = file.split('csv/')[1]
             # Upload to drive
             # Check if data historical data is available on the drive
             isDataAvailable, file_id = self.objCommon.check_previous_data_exist(file, folderID)
             if isDataAvailable == False:
                 self.save_to_drive(folderID, name_of_file, file)
             else:
-                df_now = pd.read_csv('csv/' + name_of_file, index_col=0)
+                df_now = pd.read_csv(os.getcwd() + '/Edelweiss/csv/' + name_of_file, index_col=0)
                 # Download file
-                file_to_save = 'd_csv/' + name_of_file
+                file_to_save = os.getcwd() + '/Edelweiss/d_csv/' + name_of_file
                 self.objGAPI.download_files(service, file_to_save, file_id, False)
-                previous_df = pd.read_csv('d_csv/' + name_of_file, index_col=0)
+                previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + name_of_file, index_col=0)
 
                 # Go for outliers or not
                 if len(previous_df['StrTradeDateTime'].unique().tolist()) >= edleConfig.no_of_past_instruments:
@@ -123,8 +124,8 @@ class ProcessEd:
                     self.get_outliers(df_now, previous_df, dt)
 
                 result = self.concate(previous_df, df_now)
-                result.to_csv('sample_data/' + name_of_file, index=False)
-                self.save_to_drive(folderID, name_of_file, 'sample_data/' + name_of_file)
+                result.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file, index=False)
+                self.save_to_drive(folderID, name_of_file, os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
 
         # machine_name = input('Enter machine name as Mayur/Uddesh/Jiten ')
     def start(self, machine_name):

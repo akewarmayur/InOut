@@ -1,7 +1,7 @@
 from common.gAPI import GoogleAPI
 import time
 import glob
-
+import numpy as np
 
 class CommonFunctions:
 
@@ -23,7 +23,7 @@ class CommonFunctions:
 
     def check_previous_data_exist(self, file_path, folder_id):
         try:
-            name_of_file = file_path.split('/')[1]
+            name_of_file = file_path.split('csv/')[1]
             service = self.objGAPI.intiate_gdAPI()
             file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", folder_id, True)
             if type(file_id) is str:
@@ -53,6 +53,19 @@ class CommonFunctions:
             list_of_outliers = list(set(df[column_name].values.tolist()) - set(final_list))
             return sorted(list_of_outliers, reverse=True)
         except Exception as e:
-            print('Exception in getting list of files', e)
+            print('Exception in getting list of outliers', e)
+            return []
+
+    def get_outliers_from_list(self, lst):
+        try:
+            mn = np.mean(lst)
+            sd = np.std(lst)
+            final_list = [x for x in lst if (x > mn - 2 * sd)]
+            final_list = [x for x in final_list if (x < mn + 2 * sd)]
+            list_of_outliers = list(set(lst) - set(final_list))
+            #print('outliers:', list_of_outliers)
+            return list_of_outliers
+        except Exception as e:
+            print('Exception in getting list of outliers', e)
             return []
 

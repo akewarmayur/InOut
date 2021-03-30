@@ -6,6 +6,7 @@ from pytz import timezone
 import requests
 from dateutil.parser import parse
 import io
+import os
 warnings.filterwarnings("ignore")
 
 class ScrapData:
@@ -17,9 +18,9 @@ class ScrapData:
                         'Accept-Language': 'en-US,en;q=0.9'}
 
     def start_scraping(self, scripName, expDate):
-        time_now = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+        #time_now = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
         exd = expDate.replace(' ', '_')
-        file_saved_as = "csv/" + str(scripName) + "_" + str(exd) + ".csv"
+        file_saved_as = os.getcwd() + "/Edelweiss/csv/" + str(scripName) + "_" + str(exd) + ".csv"
         if scripName == 'FINNIFTY' or scripName == 'BANKNIFTY' or scripName == 'NIFTY':
             data = '{ ' + "'exp':'{0}','aTyp':'OPTIDX','uSym':'{1}'".format(expDate, scripName) + '}'
         else:

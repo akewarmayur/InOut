@@ -1,9 +1,13 @@
 from common.sheetOperations import SheetOps
-from scrapIn import ScrapData
+from Investing.scrapIn import ScrapData
 from common.common import CommonFunctions
 from common.gAPI import GoogleAPI
 from Investing.helpers import Help
 import pandas as pd
+import Investing.investConfig as investConfig
+from Investing.helpIn import HelpIn
+import argparse
+import os
 
 class ProcessIn:
 
@@ -15,6 +19,7 @@ class ProcessIn:
         self.objCommon = CommonFunctions()
         self.objGAPI = GoogleAPI()
         self.objHelp = Help()
+        self.objHelpIn = HelpIn()
 
     def get_url(self):
         for _ in range(5):
@@ -55,19 +60,13 @@ class ProcessIn:
 
         return final
 
-    def get_outliers_200(self, df, column_name):
-        df_new = df.loc[:, :'volume']
-        if len(df_new.index) > 200:
-            df_new = df_new.head(200)
+    def get_slice(self, current_df):
+        if len(current_df) > 20:
+            df_new = current_df[:20]
+            return df_new
+        else:
+            return current_df
 
-        df_new = self.objScrap.cal_indicators(df_new, ha=False, all=False)
-
-        mn = df_new[column_name].mean()
-        sd = df_new[column_name].std()
-        final_list = [x for x in df_new[column_name] if (x > mn - 2 * sd)]
-        final_list = [x for x in final_list if (x < mn + 2 * sd)]
-        list_of_outliers = list(set(df_new[column_name].values.tolist()) - set(final_list))
-        return sorted(list_of_outliers, reverse=True)
 
     def start(self, machine_name):
         service = self.objGAPI.intiate_gdAPI()
@@ -79,8 +78,8 @@ class ProcessIn:
         resolutions_list = content['Configuration']
         isMarketON = content['MarketON']
         isMarketON = isMarketON[0]
-        print('To be Scrapped: ', resolutions_list)
-        print('No of days: ', no_of_days)
+        print('To be Scrapped: ', str(resolutions_list))
+        print('No of days: ', str(no_of_days))
 
         content = self.objSheet.readSheet('CIEconfig', 'InvestingStocks', machine_name)
         content = content['Pid']
@@ -90,85 +89,117 @@ class ProcessIn:
             print('No stocks are available in the list to scrap data')
         else:
             try:
-                for PID in pid:
-                    symbl = self.readSymbol(PID)
-                    symbl = symbl[0]
-                    name_of_stock = symbl
-                    for i, item in enumerate(resolutions_list):
-                        resolution = self.resolution_dict[item]
+                if isMarketON == 'TRUE':
+                    while True:
+                        for PID in pid:
+                            symbl = self.readSymbol(PID)
+                            symbl = symbl[0]
+                            name_of_stock = symbl
+                            for i, item in enumerate(resolutions_list):
+                                resolution = self.resolution_dict[item]
 
-                        file = 'csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
-                        file_to_save = 'd_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
-                        # check the historic data is available for the stock
-                        isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
-                        print('Is Data Available:', isDataAvailable)
+                                file = os.getcwd() + '/Investing/csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
+                                file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
+                                # check the historic data is available for the stock
+                                isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
+                                print('Is Data Available:', isDataAvailable)
 
-                        if isDataAvailable == False:
-                            # URL, PID, symbl, row, end_date, no_of_days)
-                            status = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
-                            # calculate indicators and upload to drive
-                            data = pd.read_csv(file, parse_dates=['datetime'])
+                                if isDataAvailable == False:
+                                    # URL, PID, symbl, row, end_date, no_of_days)
+                                    status = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
+                                    # calculate indicators and upload to drive
+                                    data = pd.read_csv(file, parse_dates=['datetime'])
 
-                            # data.reset_index(drop=True, inplace=True)
+                                    # data.reset_index(drop=True, inplace=True)
 
-                            data = self.objScrap.cal_indicators(data, ha=True, all=True)
-                            # data = objIndicators.cal_heiken_ashi(data)
+                                    data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                    # data = objIndicators.cal_heiken_ashi(data)
 
-                            outliers_close = self.get_outliers_200(data, 'close')
-                            outliers_volume = self.get_outliers_200(data, 'volume')
-                            outliers_per = self.get_outliers_200(data, 'per_change_count')
+                                    notify_df = self.get_slice(data)
+                                    self.objHelpIn.notifications(notify_df)
+                                    self.objHelp.save_to_drive(data, file)
 
-                            print(f"close outliers on first 200 Candles: {outliers_close} ")
-                            print(f"volume outliers on first 200 Candles: {outliers_volume} ")
-                            print(f"per_change_count outliers on first 200 Candles: {outliers_per} ")
+                                elif isDataAvailable == True:
+                                    # Download File in Local directory
+                                    self.objGAPI.download_files(service, file_to_save, file_id, False)
+                                    previous_data = pd.read_csv(file_to_save, parse_dates=['datetime'])
+                                    # previous_data.head()
+                                    end_date = self.objHelp.get_end_date(previous_data)
+                                    # print('End Date of Data=> ', end_date)
+                                    # print(data.head(5))
 
-                            # writesheet(Symbol, timenow, Name, Res, Outliers_Close, Outliers_Volume, Outliers_per_change_count)
-                            # objScrapData.writesheet(str(PID), name_of_stock, objScrapData.convertUTC_IST(), str(resolution),
-                            #                         str(outliers_close), str(outliers_volume), str(outliers_per))
+                                    # Scrap Todays data as per config sheet and save in 'csv' local folder
+                                    status = self.objScrap.scrap(URL, PID, symbl, item, end_date, no_of_days[i])
+                                    if status == True:
+                                        current_data = pd.read_csv(file, parse_dates=['datetime'])
+                                        current_data.head()
+                                        data = self.concate(previous_data, current_data)
+                                        # data.reset_index(drop=True, inplace=True)
 
-                            # Upload to drive based on condition
-                            if isMarketON == 'FALSE':
+                                        notify_df = self.get_slice(data)
+                                        self.objHelpIn.notifications(notify_df)
+                                        self.objHelp.save_to_drive(data, file)
+                                    else:
+                                        print('No Data available in the given range of date')
+
+                                else:
+                                    print('Something is Wrong, Try Again')
+
+                else:
+                    for PID in pid:
+                        symbl = self.readSymbol(PID)
+                        symbl = symbl[0]
+                        name_of_stock = symbl
+                        for i, item in enumerate(resolutions_list):
+                            resolution = self.resolution_dict[item]
+
+                            file = os.getcwd() + '/Investing/csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
+                            file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
+                            # check the historic data is available for the stock
+                            isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
+                            print('Is Data Available:', isDataAvailable)
+
+                            if isDataAvailable == False:
+                                # URL, PID, symbl, row, end_date, no_of_days)
+                                status = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
+                                # calculate indicators and upload to drive
+                                data = pd.read_csv(file, parse_dates=['datetime'])
+
+                                # data.reset_index(drop=True, inplace=True)
+
+                                data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                # data = objIndicators.cal_heiken_ashi(data)
+
+                                notify_df = self.get_slice(data)
+                                self.objHelpIn.notifications(notify_df)
                                 self.objHelp.save_to_drive(data, file)
 
-                        elif isDataAvailable == True:
-                            # Download File in Local directory
-                            self.objGAPI.download_files(service, file_to_save, file_id, False)
-                            previous_data = pd.read_csv(file_to_save, parse_dates=['datetime'])
-                            previous_data.head()
-                            end_date = self.objHelp.get_end_date(previous_data)
-                            # print('End Date of Data=> ', end_date)
-                            # print(data.head(5))
+                            elif isDataAvailable == True:
+                                # Download File in Local directory
+                                self.objGAPI.download_files(service, file_to_save, file_id, False)
+                                previous_data = pd.read_csv(file_to_save, parse_dates=['datetime'])
+                                # previous_data.head()
+                                end_date = self.objHelp.get_end_date(previous_data)
+                                # print('End Date of Data=> ', end_date)
+                                # print(data.head(5))
 
-                            # Scrap Todays data as per config sheet and save in 'csv' local folder
-                            status = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
-                            if status == True:
-                                current_data = pd.read_csv(file, parse_dates=['datetime'])
-                                current_data.head()
-                                data = self.concate(previous_data, current_data)
-                                # data.reset_index(drop=True, inplace=True)
-                                outliers_close = self.get_outliers_200(data, 'close')
-                                outliers_volume = self.get_outliers_200(data, 'volume')
-                                outliers_per = self.get_outliers_200(data, 'per_change_count')
+                                # Scrap Todays data as per config sheet and save in 'csv' local folder
+                                status = self.objScrap.scrap(URL, PID, symbl, item, end_date, no_of_days[i])
+                                if status == True:
+                                    current_data = pd.read_csv(file, parse_dates=['datetime'])
+                                    current_data.head()
+                                    data = self.concate(previous_data, current_data)
+                                    # data.reset_index(drop=True, inplace=True)
 
-                                print(f"close outliers on first 200 Candles: {outliers_close} ")
-                                print(f"volume outliers on first 200 Candles: {outliers_volume} ")
-                                print(f"per_change_count outliers on first 200 Candles: {outliers_per} ")
-
-                                # objScrapData.writesheet(str(PID), name_of_stock, objScrapData.convertUTC_IST(), str(resolution),
-                                #                         str(outliers_close), str(outliers_volume), str(outliers_per))
-
-                                if isMarketON == 'FALSE':
+                                    notify_df = self.get_slice(data)
+                                    self.objHelpIn.notifications(notify_df)
                                     self.objHelp.save_to_drive(data, file)
-                            else:
-                                print('No Data available in the given range of date')
+                                else:
+                                    print('No Data available in the given range of date')
 
-                        else:
-                            print('Something is Wrong, Try Again')
+                            else:
+                                print('Something is Wrong, Try Again')
+
             except Exception as e:
                 print(e)
 
-        # if isMarketON == 'TRUE':
-        #     objRun.save_to_drive_at_once()
-if __name__ == '__main__':
-    obj = ProcessIn()
-    obj.start('Mayur')

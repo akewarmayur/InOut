@@ -1,13 +1,10 @@
 import requests
 import ast
-import datetime
 import pandas as pd
 import time
 import warnings
-from pytz import timezone
 from Investing.helpers import Help
 from Investing.Indicators import Indicators
-import pandas_ta as ta
 warnings.filterwarnings("ignore")
 
 
