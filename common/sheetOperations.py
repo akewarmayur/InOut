@@ -5,7 +5,8 @@ from pathlib import Path
 class SheetOps:
 
     def __init__(self):
-        self.srvFilePath = os.path.join(Path(__file__).cwd(), "/InOut/helpers/ck8sproject-e1fb187dcd6d.json")
+        self.srvFilePath = os.getcwd() + "/helpers/ck8sproject-e1fb187dcd6d.json"
+        #self.srvFilePath = os.path.join(Path(__file__).cwd(), "/InOut/helpers/ck8sproject-e1fb187dcd6d.json")
 
     def readSheet(self, spreadsheet_name, sheet_name, machine_name=None):
         try:
