@@ -5,6 +5,7 @@ import time
 from pytz import timezone
 from common.common import CommonFunctions
 import warnings
+import os
 from common.gAPI import GoogleAPI
 
 warnings.filterwarnings("ignore")
@@ -75,13 +76,14 @@ class Help:
         return int(timestamp)
 
     def get_resolution_type(self, file_name):
+        #1wyLQQLg-QKY5zrocxV6YQLhjknjUKLoX
         hh = file_name.split('_')[1]
         resolution_type = hh.split('.')[0]
         return resolution_type
 
     def get_folder_id(self, file):
         folder_id = 0
-        name_of_file = file.split('/')[1]
+        name_of_file = file.split('csv/')[1]
         resolution_type = self.get_resolution_type(name_of_file)
         if resolution_type == 'D':
             folder_id = '1qOF0mqmrMwrY3HR0QEXpBZKI9n3F43WU'
@@ -100,7 +102,7 @@ class Help:
         return folder_id
 
     def check_previous_data_exist(self, file_name):
-        name_of_file = file_name.split('/')[1]
+        name_of_file = file_name.split('csv/')[1]
         service = self.objGAPI.intiate_gdAPI()
         folder_id = self.get_folder_id(file_name)
         file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", folder_id, True)
@@ -112,10 +114,10 @@ class Help:
 
     def save_to_drive(self, temp, file):
         temp = self.objCommon.drop_extra_columns(temp, self.fixed_columns)
-        name_of_file = file.split('/')[1]
-        temp.to_csv('sample_data/' + name_of_file, index=False)
-        destination = 'sample_data/' + name_of_file
-        resolution_type = self.get_resolution_type(name_of_file)
+        name_of_file = file.split('csv/')[1]
+        temp.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
+        destination = os.getcwd() + '/Investing/sample_data/' + name_of_file
+        #resolution_type = self.get_resolution_type(name_of_file)
         folder_id = self.get_folder_id(file)
         service = self.objGAPI.intiate_gdAPI()
         # Search file id to check it is exists or not
@@ -133,8 +135,8 @@ class Help:
             file_id = 0
             temp = pd.read_csv(file, index_col=0)
             print(temp.head(2))
-            name_of_file = file.split('/')[1]
-            destination = 'sample_data/' + name_of_file
+            name_of_file = file.split('csv/')[1]
+            destination = os.getcwd() + '/Investing/sample_data/sample_data/' + name_of_file
             resolution_type = self.get_resolution_type(name_of_file)
             folder_id = self.get_folder_id(file)
             service = self.objGAPI.intiate_gdAPI()
