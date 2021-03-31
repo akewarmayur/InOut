@@ -5,6 +5,7 @@ import time
 import warnings
 from Investing.helpers import Help
 from Investing.Indicators import Indicators
+import os
 warnings.filterwarnings("ignore")
 
 
@@ -102,7 +103,7 @@ class ScrapData:
             df = df.reindex(columns=new_columns)
             #df.set_index('datetime', inplace=True)
             df.set_index('datetime', inplace=True)
-            df.to_csv('csv/'+str(symbl)+'_'+str(resolution)+ '.csv')
+            df.to_csv(os.getcwd() + '/Investing/csv/'+str(symbl)+'_'+str(resolution)+ '.csv')
             return True
         except Exception as e:
             print('Getting Response Exception:', e)

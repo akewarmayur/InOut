@@ -20,6 +20,9 @@ class ProcessIn:
         self.objGAPI = GoogleAPI()
         self.objHelp = Help()
         self.objHelpIn = HelpIn()
+        self.col2wrt = ['datetime', 'symbol', 'pid', 'resolution', 'close',
+                        'volume', 'per_change', 'volume_high_count',
+                        'close_count', 'per_change_count']
 
     def get_url(self):
         for _ in range(5):
@@ -60,15 +63,13 @@ class ProcessIn:
 
         return final
 
-    def get_slice(self, current_df):
-        if len(current_df) > 20:
-            df_new = current_df[:20]
-            return df_new
-        else:
-            return current_df
-
+    def get_slice(self, current_df, ran):
+        df_new = current_df[self.col2wrt]
+        df_new = df_new[:ran]
+        return df_new
 
     def start(self, machine_name):
+        print("Machine Name : ", machine_name)
         service = self.objGAPI.intiate_gdAPI()
         URL = self.get_url()
         if URL == 'None':
@@ -114,9 +115,9 @@ class ProcessIn:
 
                                     data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                     # data = objIndicators.cal_heiken_ashi(data)
-
-                                    notify_df = self.get_slice(data)
-                                    self.objHelpIn.notifications(notify_df)
+                                    candles_to_notify_from = 20
+                                    notify_df = self.get_slice(data, 200 + candles_to_notify_from)
+                                    self.objHelpIn.notifications(notify_df, candles_to_notify_from)
                                     self.objHelp.save_to_drive(data, file)
 
                                 elif isDataAvailable == True:
@@ -135,9 +136,12 @@ class ProcessIn:
                                         current_data.head()
                                         data = self.concate(previous_data, current_data)
                                         # data.reset_index(drop=True, inplace=True)
-
-                                        notify_df = self.get_slice(data)
-                                        self.objHelpIn.notifications(notify_df)
+                                        if len(current_data) <= 20:
+                                            candles_to_notify_from = len(current_data)
+                                        else:
+                                            candles_to_notify_from = 20
+                                        notify_df = self.get_slice(data, 200 + candles_to_notify_from)
+                                        self.objHelpIn.notifications(notify_df, candles_to_notify_from)
                                         self.objHelp.save_to_drive(data, file)
                                     else:
                                         print('No Data available in the given range of date')
@@ -154,7 +158,8 @@ class ProcessIn:
                             resolution = self.resolution_dict[item]
 
                             file = os.getcwd() + '/Investing/csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
-                            file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
+                            file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(
+                                resolution) + '.csv'
                             # check the historic data is available for the stock
                             isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
                             print('Is Data Available:', isDataAvailable)
@@ -169,9 +174,9 @@ class ProcessIn:
 
                                 data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                 # data = objIndicators.cal_heiken_ashi(data)
-
-                                notify_df = self.get_slice(data)
-                                self.objHelpIn.notifications(notify_df)
+                                candles_to_notify_from = 20
+                                notify_df = self.get_slice(data, 200 + candles_to_notify_from)
+                                self.objHelpIn.notifications(notify_df, candles_to_notify_from)
                                 self.objHelp.save_to_drive(data, file)
 
                             elif isDataAvailable == True:
@@ -190,9 +195,12 @@ class ProcessIn:
                                     current_data.head()
                                     data = self.concate(previous_data, current_data)
                                     # data.reset_index(drop=True, inplace=True)
-
-                                    notify_df = self.get_slice(data)
-                                    self.objHelpIn.notifications(notify_df)
+                                    if len(current_data) <= 20:
+                                        candles_to_notify_from = len(current_data)
+                                    else:
+                                        candles_to_notify_from = 20
+                                    notify_df = self.get_slice(data, 200 + candles_to_notify_from)
+                                    self.objHelpIn.notifications(notify_df, candles_to_notify_from)
                                     self.objHelp.save_to_drive(data, file)
                                 else:
                                     print('No Data available in the given range of date')
