@@ -6,6 +6,8 @@ from common.sheetOperations import SheetOps
 import time
 import Edelweiss.edleConfig as edleConfig
 import os
+from pytz import timezone
+import datetime
 
 class ProcessEd:
     def __init__(self):
@@ -129,6 +131,7 @@ class ProcessEd:
 
         # machine_name = input('Enter machine name as Mayur/Uddesh/Jiten ')
     def start(self, machine_name):
+        strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
         diction = {}
         content = self.objSheet.readSheet('CIEconfig', 'EdelStocks', machine_name)
         symbol = self.objSheet.readSheetColumns(content, 'Symbol')
@@ -161,13 +164,16 @@ class ProcessEd:
                             self.process(symbol, expiry_date_stocks)
 
             else:
-                for symbol, indices_or_stocks in diction.items():
-                    print('For =>', symbol)
-                    if indices_or_stocks == 'FALSE':
-                        self.process(symbol, expiry_date_indices_monthly)
-                        self.process(symbol, expiry_date_indices_weekly)
-                    else:
-                        self.process(symbol, expiry_date_stocks)
+                if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) >= float(20.00):
+                    for symbol, indices_or_stocks in diction.items():
+                        print('For =>', symbol)
+                        if indices_or_stocks == 'FALSE':
+                            self.process(symbol, expiry_date_indices_monthly)
+                            self.process(symbol, expiry_date_indices_weekly)
+                        else:
+                            self.process(symbol, expiry_date_stocks)
+                else:
+                    print('Market is not ON, So no new data is Available')
 
 
 # obj = ProcessEd()
