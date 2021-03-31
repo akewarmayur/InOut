@@ -23,7 +23,7 @@ class GoogleAPI:
         self.creds = None
 
     def intiate_gdAPI(self):
-        pa = os.path.join(Path(__file__).cwd(), "/InOut/helpers/token.pickle")
+        pa = os.getcwd() + "/helpers/token.pickle"
         try:
             if os.path.exists(pa):
                 with open(pa, 'rb') as token:
