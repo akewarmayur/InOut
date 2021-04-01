@@ -100,7 +100,7 @@ class ProcessIn:
             name_of_file = file.split('csv/')[1]
             data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
             if self.iterations == 10:
-                self.objHelp.save_to_drive(data, file)
+                self.objHelp.save_to_drive(file)
 
 
     def start(self, machine_name):
@@ -157,7 +157,9 @@ class ProcessIn:
                                     candles_to_notify_from = 20
                                     notify_df = self.get_slice(data, 200 + candles_to_notify_from)
                                     self.objHelpIn.notifications(notify_df, candles_to_notify_from)
-                                    self.objHelp.save_to_drive(data, file)
+                                    name_of_file = file.split('csv/')[1]
+                                    data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
+                                    self.objHelp.save_to_drive(file)
 
                                 elif isDataAvailable == True:
                                     if resolution == 'W':
@@ -166,7 +168,7 @@ class ProcessIn:
                                     if resolution == 'D':
                                         strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                                         strcurrentDateTime = strcurrentDateTime.replace(':', '.')
-                                        if (float(strcurrentDateTime) < float('12.00')) or (float(strcurrentDateTime) < float('12.30')):
+                                        if (float(strcurrentDateTime) < float('15.00')) or (float(strcurrentDateTime) < float('15.30')):
                                             self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
                                     if resolution == 5 or resolution == 15 or resolution == 30:
                                         self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)

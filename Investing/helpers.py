@@ -112,7 +112,7 @@ class Help:
             return False, file_id
 
 
-    def save_to_drive(self, temp, file):
+    def save_to_drive(self, file):
         # temp = self.objCommon.drop_extra_columns(temp, self.fixed_columns)
         name_of_file = file.split('csv/')[1]
         # temp.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
