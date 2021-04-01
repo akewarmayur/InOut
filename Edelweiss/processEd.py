@@ -153,9 +153,9 @@ class ProcessEd:
             diction[s] = indices_or_stocks[i]
 
         expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly = self.objScrap.get_expiry_dates()
-        print("Stocks Expiry Date => ", expiry_date_stocks)
-        print("Indices Monthly Expiry Date => ", expiry_date_indices_monthly)
-        print("Indices Weekly Expiry Date => ", expiry_date_indices_weekly)
+        # print("Stocks Expiry Date => ", expiry_date_stocks)
+        # print("Indices Monthly Expiry Date => ", expiry_date_indices_monthly)
+        # print("Indices Weekly Expiry Date => ", expiry_date_indices_weekly)
         folderAvailable = False
 
         if len(diction) == 0:
@@ -166,6 +166,7 @@ class ProcessEd:
                     strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                     strcurrentTime = strcurrentTime.replace(':', '.')
                     if float(strcurrentTime) > float(15.30):
+                        print('Market is not ON. Try tomorrow or change isMarketON flag')
                         break
                     for symbol, indices_or_stocks in diction.items():
                         print('For =>', symbol)

@@ -130,6 +130,7 @@ class ProcessIn:
                         strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                         strcurrentTime = strcurrentTime.replace(':', '.')
                         if float(strcurrentTime) > float(15.30):
+                            print('Market is not ON. Try tomorrow or change isMarketON flag')
                             break
                         for PID in pid:
                             symbl = self.readSymbol(PID)
