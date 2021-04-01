@@ -82,7 +82,6 @@ class ProcessIn:
         # Download File in Local directory
         if self.first == True:
             self.objGAPI.download_files(service, file_to_save, file_id, False)
-            self.first = False
         previous_data = pd.read_csv(file_to_save, parse_dates=['datetime'])
         end_date = self.objHelp.get_end_date(previous_data)
         status = self.objScrap.scrap(URL, PID, symbl, item, end_date, no_of_days[i])
@@ -180,6 +179,7 @@ class ProcessIn:
                         self.iterations += 1
                         if self.iterations == 10:
                             self.iterations = 0
+                        self.first = False
 
                 else:
                     for PID in pid:

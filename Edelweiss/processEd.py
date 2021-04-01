@@ -18,7 +18,7 @@ class ProcessEd:
         self.fixed_columns = ['ScripName', 'StrikePrice', 'OptionType',
                               'StrTradeDateTime', 'TradeDateTime', 'ExpiryDate',
                               'StrExpiryDate', 'OI', 'COI', 'IV', 'VOL']
-        self.first = False
+        self.first = True
         self.iterations = 0
 
     def concate(self, previous_df, df_now):
@@ -120,11 +120,10 @@ class ProcessEd:
                 self.save_to_drive(folderID, name_of_file, file)
             else:
                 df_now = pd.read_csv(os.getcwd() + '/Edelweiss/csv/' + name_of_file, index_col=0)
-                if self.first == False:
+                if self.first == True:
                     # Download file
                     file_to_save = os.getcwd() + '/Edelweiss/d_csv/' + name_of_file
                     self.objGAPI.download_files(service, file_to_save, file_id, False)
-                    self.first = True
                 previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + name_of_file, index_col=0)
 
                 # Go for outliers or not
@@ -178,6 +177,8 @@ class ProcessEd:
                     self.iterations += 1
                     if self.iterations == 10:
                         self.iterations = 0
+                    self.first = False
+
 
             else:
                 strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
