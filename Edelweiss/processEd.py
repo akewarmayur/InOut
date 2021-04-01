@@ -32,7 +32,7 @@ class ProcessEd:
 
         return final
 
-    def get_outliers(self, df_current, df_past, expiry_date):
+    def get_outliers(self, symbol, df_current, df_past, expiry_date):
         try:
             timings = df_past['StrTradeDateTime'].unique().tolist()
             timings_to_take = timings[:edleConfig.no_of_past_instruments]
@@ -74,11 +74,11 @@ class ProcessEd:
                 if current_coi_ce in list_of_outliers_ce:
                     #writeSheet(self, filenameToRead, list_to_write, sheet_name)
                     #datetime, instrument code, option type, strike price, old COI, new COI
-                    list_to_write = [d_ce[4], d_ce[0], expiry_date, 'CE', s, old_coi_ce, current_coi_ce]
+                    list_to_write = [d_ce[4], symbol, expiry_date, 'CE', s, old_coi_ce, current_coi_ce]
                     self.objSheet.writeSheet('CIEnotifications',list_to_write, 'EdelweissNotify')
                     print('Notify CE COI')
                 if current_coi_pe in list_of_outliers_pe:
-                    list_to_write = [d_pe[4], d_pe[0], expiry_date, 'PE', s, old_coi_pe, current_coi_pe]
+                    list_to_write = [d_pe[4], symbol, expiry_date, 'PE', s, old_coi_pe, current_coi_pe]
                     self.objSheet.writeSheet('CIEnotifications', list_to_write, 'EdelweissNotify')
                     print('Notify PE COI')
         except Exception as e:
@@ -130,7 +130,7 @@ class ProcessEd:
                 # Go for outliers or not
                 if len(previous_df['StrTradeDateTime'].unique().tolist()) >= edleConfig.no_of_past_instruments:
                     # Notify Outliers if any
-                    self.get_outliers(df_now, previous_df, dt)
+                    self.get_outliers(symbol, df_now, previous_df, dt)
 
                 result = self.concate(previous_df, df_now)
                 result.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file, index=False)
@@ -166,7 +166,7 @@ class ProcessEd:
                 while True:
                     strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                     strcurrentTime = strcurrentTime.replace(':', '.')
-                    if float(strcurrentTime) > float(03.30) or float(strcurrentTime) > float(3.30):
+                    if float(strcurrentTime) > float(15.30):
                         break
                     for symbol, indices_or_stocks in diction.items():
                         print('For =>', symbol)

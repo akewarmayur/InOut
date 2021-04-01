@@ -130,7 +130,7 @@ class ProcessIn:
                     while True:
                         strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                         strcurrentTime = strcurrentTime.replace(':', '.')
-                        if float(strcurrentTime) > float(03.30) or float(strcurrentTime) > float(3.30):
+                        if float(strcurrentTime) > float(15.30):
                             break
                         for PID in pid:
                             symbl = self.readSymbol(PID)
