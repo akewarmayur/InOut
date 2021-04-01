@@ -24,15 +24,6 @@ class ProcessIn:
         self.col2wrt = ['datetime', 'symbol', 'pid', 'resolution', 'close',
                         'volume', 'per_change', 'volume_high_count',
                         'close_count', 'per_change_count']
-        self.fixed_columns = ['datetime', 'symbol', 'pid', 'resolution', 'open', 'close', 'high',
-                              'low', 'volume', 'EMA_50', 'EMA_100', 'EMA_200', 'BBL_14_2.0',
-                              'BBM_14_2.0', 'BBU_14_2.0', 'BBB_14_2.0', 'RSI_14', 'PSARl_0.02_0.2',
-                              'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'ISA_9',
-                              'ISB_26', 'ITS_9', 'IKS_26', 'ICS_26', 'per_change',
-                              'volume_high_count', 'close_count', 'per_change_count', 'ha_close',
-                              'ha_open', 'ha_high', 'ha_low']
-        self.first = True
-        self.iterations = 0
 
     def get_url(self):
         for _ in range(5):
@@ -80,9 +71,7 @@ class ProcessIn:
 
     def process(self, service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file):
         # Download File in Local directory
-        if self.first == True:
-            self.objGAPI.download_files(service, file_to_save, file_id, False)
-            self.first = False
+        self.objGAPI.download_files(service, file_to_save, file_id, False)
         previous_data = pd.read_csv(file_to_save, parse_dates=['datetime'])
         end_date = self.objHelp.get_end_date(previous_data)
         status = self.objScrap.scrap(URL, PID, symbl, item, end_date, no_of_days[i])
@@ -97,12 +86,7 @@ class ProcessIn:
                 candles_to_notify_from = 20
             notify_df = self.get_slice(data, 200 + candles_to_notify_from)
             self.objHelpIn.notifications(notify_df, candles_to_notify_from)
-            data = self.objCommon.drop_extra_columns(data, self.fixed_columns)
-            name_of_file = file.split('csv/')[1]
-            data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
-            if self.iterations == 10:
-                self.objHelp.save_to_drive(data, file)
-                self.iterations = 0
+            self.objHelp.save_to_drive(data, file)
 
     def start(self, machine_name):
         print("Machine Name : ", machine_name)
@@ -172,7 +156,6 @@ class ProcessIn:
 
                                 else:
                                     print('Something is Wrong, Try Again')
-                        self.iterations += 1
 
                 else:
                     for PID in pid:

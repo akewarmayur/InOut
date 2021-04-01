@@ -18,8 +18,6 @@ class ProcessEd:
         self.fixed_columns = ['ScripName', 'StrikePrice', 'OptionType',
                               'StrTradeDateTime', 'TradeDateTime', 'ExpiryDate',
                               'StrExpiryDate', 'OI', 'COI', 'IV', 'VOL']
-        self.first = False
-        self.iterations = 0
 
     def concate(self, previous_df, df_now):
         try:
@@ -117,11 +115,9 @@ class ProcessEd:
                 self.save_to_drive(folderID, name_of_file, file)
             else:
                 df_now = pd.read_csv(os.getcwd() + '/Edelweiss/csv/' + name_of_file, index_col=0)
-                if self.first == False:
-                    # Download file
-                    file_to_save = os.getcwd() + '/Edelweiss/d_csv/' + name_of_file
-                    self.objGAPI.download_files(service, file_to_save, file_id, False)
-                    self.first = True
+                # Download file
+                file_to_save = os.getcwd() + '/Edelweiss/d_csv/' + name_of_file
+                self.objGAPI.download_files(service, file_to_save, file_id, False)
                 previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + name_of_file, index_col=0)
 
                 # Go for outliers or not
@@ -131,9 +127,7 @@ class ProcessEd:
 
                 result = self.concate(previous_df, df_now)
                 result.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file, index=False)
-                if self.iterations == 10:
-                    self.save_to_drive(folderID, name_of_file, os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
-                    self.iterations = 0
+                self.save_to_drive(folderID, name_of_file, os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
 
         # machine_name = input('Enter machine name as Mayur/Uddesh/Jiten ')
     def start(self, machine_name):
@@ -168,10 +162,9 @@ class ProcessEd:
                             self.process(symbol, expiry_date_indices_weekly)
                         else:
                             self.process(symbol, expiry_date_stocks)
-                    self.iterations += 1
 
             else:
-                if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) <= float(20.00):
+                if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) >= float(20.00):
                     for symbol, indices_or_stocks in diction.items():
                         print('For =>', symbol)
                         if indices_or_stocks == 'FALSE':
