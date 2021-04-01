@@ -82,15 +82,8 @@ class ScrapData:
             print(url)
             response = requests.get(url, headers=self.USER_AGENT)
             res = ast.literal_eval(response.text)
-            #print('********', res)
-            if res["s"] == "no_data":
-                fromValue = int(datetime.datetime.timestamp(datetime.datetime.now()))
-                url = URL + 'symbol=' + str(symbol) + '&resolution=' + str(resolution) + '&from=' + str(fromValue) + '&to=' + str(toValue)
-                response = requests.get(url, headers=self.USER_AGENT)
-                res = ast.literal_eval(response.text)
-                if res["s"] == "no_data":
-                    print('Not getting response in given timestamp')
-                    return False
+            print('********', res)
+
             try:
               del res['vo']
             except:

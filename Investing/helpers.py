@@ -31,6 +31,7 @@ class Help:
         end_d = df['datetime'].iloc[0]
         print('Last Date of scrapped data=> ', end_d)
         end_date = datetime.datetime.timestamp(end_d)
+        print('End date timestamp=> ', end_date)
         return int(end_date)
 
     def cvtDateTimeToNumber(self, dtime):
