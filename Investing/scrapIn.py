@@ -6,6 +6,7 @@ import warnings
 from Investing.helpers import Help
 from Investing.Indicators import Indicators
 import os
+import datetime
 warnings.filterwarnings("ignore")
 
 
@@ -78,10 +79,18 @@ class ScrapData:
             # print('fromValue:', fromValue)
             # print('toValue:', toValue)
             url = URL+'symbol='+str(symbol)+'&resolution='+str(resolution)+'&from='+str(fromValue)+'&to='+str(toValue)
-            # print(url)
+            print(url)
             response = requests.get(url, headers=self.USER_AGENT)
             res = ast.literal_eval(response.text)
             #print('********', res)
+            if res["s"] == "no_data":
+                fromValue = int(datetime.datetime.timestamp(datetime.datetime.now()))
+                url = URL + 'symbol=' + str(symbol) + '&resolution=' + str(resolution) + '&from=' + str(fromValue) + '&to=' + str(toValue)
+                response = requests.get(url, headers=self.USER_AGENT)
+                res = ast.literal_eval(response.text)
+                if res["s"] == "no_data":
+                    print('Not getting response in given timestamp')
+                    return False
             try:
               del res['vo']
             except:
@@ -93,7 +102,7 @@ class ScrapData:
             res['pid'] = symbol
             res['resolution'] = resolution
             res['symbol'] = symbl
-            df = pd.DataFrame()
+            #df = pd.DataFrame()
             df = pd.DataFrame(res)
             df.rename(columns = {"t": "datetime", "o":"open", "c":"close", "h":"high", "l":"low", "v":"volume"}, inplace = True)
             new_columns = ['symbol', 'pid', 'resolution', 'datetime', 'open', 'close', 'high', 'low', 'volume']

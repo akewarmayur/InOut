@@ -183,7 +183,7 @@ class ProcessEd:
             else:
                 strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                 strcurrentDateTime = strcurrentDateTime.replace(':', '.')
-                if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) <= float(20.00):
+                if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) <= float(17.00):
                     for symbol, indices_or_stocks in diction.items():
                         print('For =>', symbol)
                         if indices_or_stocks == 'FALSE':
