@@ -165,6 +165,7 @@ class ProcessEd:
             if isMarketON == 'TRUE':
                 while True:
                     strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                    strcurrentTime = strcurrentTime.replace(':', '.')
                     if float(strcurrentTime) > float(03.30) or float(strcurrentTime) > float(3.30):
                         break
                     for symbol, indices_or_stocks in diction.items():
@@ -179,6 +180,8 @@ class ProcessEd:
                         self.iterations = 0
 
             else:
+                strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                strcurrentDateTime = strcurrentDateTime.replace(':', '.')
                 if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) <= float(20.00):
                     for symbol, indices_or_stocks in diction.items():
                         print('For =>', symbol)

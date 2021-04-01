@@ -129,6 +129,7 @@ class ProcessIn:
                 if isMarketON == 'TRUE':
                     while True:
                         strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                        strcurrentTime = strcurrentTime.replace(':', '.')
                         if float(strcurrentTime) > float(03.30) or float(strcurrentTime) > float(3.30):
                             break
                         for PID in pid:
@@ -165,7 +166,8 @@ class ProcessIn:
                                             self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
                                     if resolution == 'D':
                                         strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
-                                        if (float(strcurrentDateTime) < float('9.30')) or (float(strcurrentDateTime) < float('09.30')):
+                                        strcurrentDateTime = strcurrentDateTime.replace(':', '.')
+                                        if (float(strcurrentDateTime) < float('12.00')) or (float(strcurrentDateTime) < float('12.30')):
                                             self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
                                     if resolution == 5 or resolution == 15 or resolution == 30:
                                         self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
@@ -215,6 +217,7 @@ class ProcessIn:
                                         self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
                                 if resolution == 'D':
                                     strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                                    strcurrentDateTime = strcurrentDateTime.replace(':', '.')
                                     if (float(strcurrentDateTime) < float('9.30')) or (float(strcurrentDateTime) < float('09.30')):
                                         self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
                                 if resolution == 5 or resolution == 15 or resolution == 30:
