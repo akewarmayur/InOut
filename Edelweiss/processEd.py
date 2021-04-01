@@ -76,11 +76,11 @@ class ProcessEd:
                     #datetime, instrument code, option type, strike price, old COI, new COI
                     list_to_write = [d_ce[4], symbol, expiry_date, 'CE', s, old_coi_ce, current_coi_ce]
                     self.objSheet.writeSheet('CIEnotifications',list_to_write, 'EdelweissNotify')
-                    print('Notify CE COI')
+                    # print('Notify CE COI')
                 if current_coi_pe in list_of_outliers_pe:
                     list_to_write = [d_pe[4], symbol, expiry_date, 'PE', s, old_coi_pe, current_coi_pe]
                     self.objSheet.writeSheet('CIEnotifications', list_to_write, 'EdelweissNotify')
-                    print('Notify PE COI')
+                    # print('Notify PE COI')
         except Exception as e:
             print('Exception in Edle Notifications:', e)
 
