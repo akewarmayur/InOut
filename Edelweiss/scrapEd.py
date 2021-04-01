@@ -25,7 +25,7 @@ class ScrapData:
             data = '{ ' + "'exp':'{0}','aTyp':'OPTIDX','uSym':'{1}'".format(expDate, scripName) + '}'
         else:
             data = '{ ' + "'exp':'{0}','aTyp':'OPTSTK','uSym':'{1}'".format(expDate, scripName) + '}'
-        print(data)
+        # print(data)
         runCtr = 0
         try:
             r = requests.post(url=self.url, timeout=20, headers=self.headers, data=data)
@@ -72,7 +72,7 @@ class ScrapData:
                         ctr] = scripName, strikePrice, optionType, strcurrentDateTime, currentDateTime, ExpiryDate, strExpiryDate, float(
                         OI), float(COI), float(IV), int(VOL)
             df.to_csv(file_saved_as, index=False)
-            print(df.head(2))
+            # print(df.head(2))
             print(strcurrentDateTime)
             return file_saved_as
         except Exception as e:

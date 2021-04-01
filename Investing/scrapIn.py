@@ -78,7 +78,7 @@ class ScrapData:
             # print('fromValue:', fromValue)
             # print('toValue:', toValue)
             url = URL+'symbol='+str(symbol)+'&resolution='+str(resolution)+'&from='+str(fromValue)+'&to='+str(toValue)
-            print(url)
+            # print(url)
             response = requests.get(url, headers=self.USER_AGENT)
             res = ast.literal_eval(response.text)
             #print('********', res)

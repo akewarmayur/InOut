@@ -62,7 +62,7 @@ class Help:
 
     def cnvNumber(self):
         tod = self.convertUTC_IST()
-        print("today: ", tod)
+        # print("today: ", tod)
         timestamp = datetime.datetime.timestamp(tod)
         return int(timestamp)
 
@@ -71,7 +71,7 @@ class Help:
         tod = self.convertUTC_IST()
         backdate = datetime.timedelta(days = numofDays)
         next_date_time = tod - backdate
-        print("next date time :", next_date_time)
+        # print("next date time :", next_date_time)
         timestamp = datetime.datetime.timestamp(next_date_time)
         return int(timestamp)
 
@@ -113,9 +113,9 @@ class Help:
 
 
     def save_to_drive(self, temp, file):
-        temp = self.objCommon.drop_extra_columns(temp, self.fixed_columns)
+        # temp = self.objCommon.drop_extra_columns(temp, self.fixed_columns)
         name_of_file = file.split('csv/')[1]
-        temp.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
+        # temp.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
         destination = os.getcwd() + '/Investing/sample_data/' + name_of_file
         #resolution_type = self.get_resolution_type(name_of_file)
         folder_id = self.get_folder_id(file)
@@ -134,7 +134,7 @@ class Help:
         for file in glob.glob('sample_data/*.csv'):
             file_id = 0
             temp = pd.read_csv(file, index_col=0)
-            print(temp.head(2))
+            # print(temp.head(2))
             name_of_file = file.split('csv/')[1]
             destination = os.getcwd() + '/Investing/sample_data/sample_data/' + name_of_file
             resolution_type = self.get_resolution_type(name_of_file)

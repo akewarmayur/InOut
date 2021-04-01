@@ -33,53 +33,56 @@ class ProcessEd:
         return final
 
     def get_outliers(self, df_current, df_past, expiry_date):
-        timings = df_past['StrTradeDateTime'].unique().tolist()
-        timings_to_take = timings[:edleConfig.no_of_past_instruments]
-        strik_price_list = df_current['StrikePrice'].unique().tolist()
-        newdf = df_past[df_past.StrTradeDateTime.isin(timings_to_take)]
+        try:
+            timings = df_past['StrTradeDateTime'].unique().tolist()
+            timings_to_take = timings[:edleConfig.no_of_past_instruments]
+            strik_price_list = df_current['StrikePrice'].unique().tolist()
+            newdf = df_past[df_past.StrTradeDateTime.isin(timings_to_take)]
 
-        for a, s in enumerate(strik_price_list):
-            tt = []
+            for a, s in enumerate(strik_price_list):
+                tt = []
 
-            current_coi_ce = None
-            current_coi_pe = None
-            old_coi_ce = None
-            old_coi_pe = None
+                current_coi_ce = None
+                current_coi_pe = None
+                old_coi_ce = None
+                old_coi_pe = None
 
-            tempCE = df_current[(df_current.OptionType == 'CE') & (df_current.StrikePrice == s)]['COI']
-            current_coi_ce = tempCE.tolist()[0]
-            tempPE = df_current[(df_current.OptionType == 'PE') & (df_current.StrikePrice == s)]['COI']
-            current_coi_pe = tempPE.tolist()[0]
-            tt.append(current_coi_ce)
-            tt.append(current_coi_pe)
+                tempCE = df_current[(df_current.OptionType == 'CE') & (df_current.StrikePrice == s)]['COI']
+                current_coi_ce = tempCE.tolist()[0]
+                tempPE = df_current[(df_current.OptionType == 'PE') & (df_current.StrikePrice == s)]['COI']
+                current_coi_pe = tempPE.tolist()[0]
+                tt.append(current_coi_ce)
+                tt.append(current_coi_pe)
 
-            for i, j in enumerate(newdf['StrikePrice']):
-                if s == j:
-                    tt.append(newdf['COI'].iloc[i])
+                for i, j in enumerate(newdf['StrikePrice']):
+                    if s == j:
+                        tt.append(newdf['COI'].iloc[i])
 
-            tt_ce = [tt[x] for x in range(len(tt)) if x % 2 == 0]
-            tt_pe = [tt[x] for x in range(len(tt)) if x % 2 != 0]
-            old_coi_ce = tt_ce[1]
-            old_coi_pe = tt_pe[1]
+                tt_ce = [tt[x] for x in range(len(tt)) if x % 2 == 0]
+                tt_pe = [tt[x] for x in range(len(tt)) if x % 2 != 0]
+                old_coi_ce = tt_ce[1]
+                old_coi_pe = tt_pe[1]
 
-            # Check Outliers
-            list_of_outliers_ce = self.objCommon.get_outliers_from_list(tt_ce)
-            list_of_outliers_pe = self.objCommon.get_outliers_from_list(tt_pe)
+                # Check Outliers
+                list_of_outliers_ce = self.objCommon.get_outliers_from_list(tt_ce)
+                list_of_outliers_pe = self.objCommon.get_outliers_from_list(tt_pe)
 
-            d = df_current[(df_current.StrikePrice == s)]
-            d_ce = d.iloc[0].to_list()
-            d_pe = d.iloc[1].to_list()
+                d = df_current[(df_current.StrikePrice == s)]
+                d_ce = d.iloc[0].to_list()
+                d_pe = d.iloc[1].to_list()
 
-            if current_coi_ce in list_of_outliers_ce:
-                #writeSheet(self, filenameToRead, list_to_write, sheet_name)
-                #datetime, instrument code, option type, strike price, old COI, new COI
-                list_to_write = [d_ce[4], d_ce[0], expiry_date, 'CE', s, old_coi_ce, current_coi_ce]
-                self.objSheet.writeSheet('CIEnotifications',list_to_write, 'EdelweissNotify')
-                print('Notify CE COI')
-            if current_coi_pe in list_of_outliers_pe:
-                list_to_write = [d_pe[4], d_pe[0], expiry_date, 'PE', s, old_coi_pe, current_coi_pe]
-                self.objSheet.writeSheet('CIEnotifications', list_to_write, 'EdelweissNotify')
-                print('Notify PE COI')
+                if current_coi_ce in list_of_outliers_ce:
+                    #writeSheet(self, filenameToRead, list_to_write, sheet_name)
+                    #datetime, instrument code, option type, strike price, old COI, new COI
+                    list_to_write = [d_ce[4], d_ce[0], expiry_date, 'CE', s, old_coi_ce, current_coi_ce]
+                    self.objSheet.writeSheet('CIEnotifications',list_to_write, 'EdelweissNotify')
+                    print('Notify CE COI')
+                if current_coi_pe in list_of_outliers_pe:
+                    list_to_write = [d_pe[4], d_pe[0], expiry_date, 'PE', s, old_coi_pe, current_coi_pe]
+                    self.objSheet.writeSheet('CIEnotifications', list_to_write, 'EdelweissNotify')
+                    print('Notify PE COI')
+        except Exception as e:
+            print('Exception in Edle Notifications:', e)
 
 
     def save_to_drive(self, folder_id, name_of_file, destination):
@@ -161,6 +164,9 @@ class ProcessEd:
         else:
             if isMarketON == 'TRUE':
                 while True:
+                    strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                    if float(strcurrentTime) > float(03.30) or float(strcurrentTime) > float(3.30):
+                        break
                     for symbol, indices_or_stocks in diction.items():
                         print('For =>', symbol)
                         if indices_or_stocks == 'FALSE':

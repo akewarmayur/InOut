@@ -62,7 +62,7 @@ class GoogleAPI:
                                           media_body=media,
                                           fields='id').execute()
             print('File ID: %s upload' % file.get('id'))
-            print('File upload success')
+            # print('File upload success')
         except Exception as e:
             print('file upload exception=>', e)
 
@@ -102,7 +102,7 @@ class GoogleAPI:
                     ff = file.get('name')
                     if ff == file_name:
                         c = True
-                        print('Found file: %s (%s)' % (file.get('name'), file.get('id')))
+                        # print('Found file: %s (%s)' % (file.get('name'), file.get('id')))
                         break
                 if c == True:
                     break
@@ -117,9 +117,10 @@ class GoogleAPI:
     def download_files(self, service, file_path, file_id, check=True):
         file = pathlib.Path(file_path)
         if file.exists() and check == True:
-            print("File exist")
+            print(' ')
+            # print("File exist")
         else:
-            print("File not exist")
+            # print("File not exist")
             # file_id = '1RZlYb9ufdqA5NjC5oJ8BgAPGW02riZTB'
             # file_name = 'yolov3.cfg'
             request = service.files().get_media(fileId=file_id)

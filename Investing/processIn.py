@@ -40,7 +40,7 @@ class ProcessIn:
           if token != 'None':
             break
         URL= 'https://tvc4.forexpros.com/'+str(token)+'/1615191589/56/56/23/history?'
-        print(URL)
+        # print(URL)
         return URL
 
     def readSymbol(self, pidValue):
@@ -115,8 +115,8 @@ class ProcessIn:
         resolutions_list = content['Configuration']
         isMarketON = content['MarketON']
         isMarketON = isMarketON[0]
-        print('To be Scrapped: ', str(resolutions_list))
-        print('No of days: ', str(no_of_days))
+        # print('To be Scrapped: ', str(resolutions_list))
+        # print('No of days: ', str(no_of_days))
 
         content = self.objSheet.readSheet('CIEconfig', 'InvestingStocks', machine_name)
         content = content['Pid']
@@ -128,6 +128,9 @@ class ProcessIn:
             try:
                 if isMarketON == 'TRUE':
                     while True:
+                        strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                        if float(strcurrentTime) > float(03.30) or float(strcurrentTime) > float(3.30):
+                            break
                         for PID in pid:
                             symbl = self.readSymbol(PID)
                             symbl = symbl[0]
@@ -139,7 +142,7 @@ class ProcessIn:
                                 file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
                                 # check the historic data is available for the stock
                                 isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
-                                print('Is Data Available:', isDataAvailable)
+                                # print('Is Data Available:', isDataAvailable)
 
                                 if isDataAvailable == False:
                                     # URL, PID, symbl, row, end_date, no_of_days)
@@ -189,7 +192,7 @@ class ProcessIn:
                                 resolution) + '.csv'
                             # check the historic data is available for the stock
                             isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
-                            print('Is Data Available:', isDataAvailable)
+                            # print('Is Data Available:', isDataAvailable)
 
                             if isDataAvailable == False:
                                 # URL, PID, symbl, row, end_date, no_of_days)
