@@ -102,7 +102,7 @@ class ProcessIn:
             data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
             if self.iterations == 10:
                 self.objHelp.save_to_drive(data, file)
-                self.iterations = 0
+
 
     def start(self, machine_name):
         print("Machine Name : ", machine_name)
@@ -173,6 +173,8 @@ class ProcessIn:
                                 else:
                                     print('Something is Wrong, Try Again')
                         self.iterations += 1
+                        if self.iterations == 10:
+                            self.iterations = 0
 
                 else:
                     for PID in pid:

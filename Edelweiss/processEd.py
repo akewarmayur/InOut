@@ -133,7 +133,7 @@ class ProcessEd:
                 result.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file, index=False)
                 if self.iterations == 10:
                     self.save_to_drive(folderID, name_of_file, os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
-                    self.iterations = 0
+
 
         # machine_name = input('Enter machine name as Mayur/Uddesh/Jiten ')
     def start(self, machine_name):
@@ -169,6 +169,8 @@ class ProcessEd:
                         else:
                             self.process(symbol, expiry_date_stocks)
                     self.iterations += 1
+                    if self.iterations == 10:
+                        self.iterations = 0
 
             else:
                 if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) <= float(20.00):
