@@ -150,7 +150,7 @@ class ProcessIn:
                                 file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
                                 # check the historic data is available for the stock
                                 isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
-                                print('Is Data Available:', isDataAvailable)
+                                #print('Is Data Available:', isDataAvailable)
 
                                 if isDataAvailable == False:
                                     # URL, PID, symbl, row, end_date, no_of_days)
@@ -209,7 +209,7 @@ class ProcessIn:
                             file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
                             # check the historic data is available for the stock
                             isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
-                            print('Is Data Available:', isDataAvailable)
+                            #print('Is Data Available:', isDataAvailable)
 
                             if isDataAvailable == False:
                                 # URL, PID, symbl, row, end_date, no_of_days)

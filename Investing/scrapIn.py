@@ -83,14 +83,17 @@ class ScrapData:
             # print('fromValue:', fromValue)
             # print('toValue:', toValue)
             url = URL+'symbol='+str(symbol)+'&resolution='+str(resolution)+'&from='+str(fromValue)+'&to='+str(toValue)
-            #print(url)
+            print('first:', url)
             response = requests.get(url, headers=self.USER_AGENT)
             res = ast.literal_eval(response.text)
+            print('first:', res)
             if res['s'] == "no_data":
                 fromValue = abs(fromValue - 19800)
                 url = URL + 'symbol=' + str(symbol) + '&resolution=' + str(resolution) + '&from=' + str(fromValue) + '&to=' + str(toValue)
+                print('second:', url)
                 response = requests.get(url, headers=self.USER_AGENT)
                 res = ast.literal_eval(response.text)
+                print('second:', res)
                 if res['s'] == "no_data":
                     return False
             try:
