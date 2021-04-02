@@ -143,7 +143,7 @@ class ProcessIn:
                                 file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
                                 # check the historic data is available for the stock
                                 isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
-                                # print('Is Data Available:', isDataAvailable)
+                                print('Is Data Available:', isDataAvailable)
 
                                 if isDataAvailable == False:
                                     # URL, PID, symbl, row, end_date, no_of_days)
@@ -182,7 +182,9 @@ class ProcessIn:
                         self.iterations += 1
                         if self.iterations == 10:
                             self.iterations = 0
-                        self.first = False
+                            self.first = True
+                        if self.iterations < 10:
+                            self.first = False
 
                 else:
                     for PID in pid:
@@ -193,11 +195,10 @@ class ProcessIn:
                             resolution = self.resolution_dict[item]
 
                             file = os.getcwd() + '/Investing/csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
-                            file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(
-                                resolution) + '.csv'
+                            file_to_save = os.getcwd() + '/Investing/d_csv/' + str(name_of_stock) + '_' + str(resolution) + '.csv'
                             # check the historic data is available for the stock
                             isDataAvailable, file_id = self.objHelp.check_previous_data_exist(file)
-                            # print('Is Data Available:', isDataAvailable)
+                            print('Is Data Available:', isDataAvailable)
 
                             if isDataAvailable == False:
                                 # URL, PID, symbl, row, end_date, no_of_days)
@@ -212,6 +213,8 @@ class ProcessIn:
                                 candles_to_notify_from = 20
                                 notify_df = self.get_slice(data, 200 + candles_to_notify_from)
                                 self.objHelpIn.notifications(notify_df, candles_to_notify_from)
+                                name_of_file = file.split('csv/')[1]
+                                data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
                                 self.objHelp.save_to_drive(file)
 
                             elif isDataAvailable == True:

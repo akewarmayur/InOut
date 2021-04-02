@@ -178,7 +178,9 @@ class ProcessEd:
                     self.iterations += 1
                     if self.iterations == 10:
                         self.iterations = 0
-                    self.first = False
+                        self.first = True
+                    if self.iterations < 10:
+                        self.first = False
 
 
             else:
