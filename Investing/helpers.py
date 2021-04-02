@@ -24,9 +24,6 @@ class Help:
                               'volume_high_count', 'close_count', 'per_change_count', 'ha_close',
                               'ha_open', 'ha_high', 'ha_low']
 
-
-
-
     def get_end_date(self, df):
         end_d = df['datetime'].iloc[0]
         print('Last Date of scrapped data=> ', end_d)
@@ -103,33 +100,39 @@ class Help:
         return folder_id
 
     def check_previous_data_exist(self, file_name):
-        name_of_file = file_name.split('csv/')[1]
-        service = self.objGAPI.intiate_gdAPI()
-        folder_id = self.get_folder_id(file_name)
-        file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", folder_id, True)
-        if type(file_id) is str:
-            return True, file_id
-        else:
-            return False, file_id
+        try:
+            name_of_file = file_name.split('csv/')[1]
+            service = self.objGAPI.intiate_gdAPI()
+            folder_id = self.get_folder_id(file_name)
+            file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", folder_id, True)
+            if type(file_id) is str:
+                return True, file_id
+            else:
+                return False, file_id
+        except Exception as e:
+            print('Exception in checking previous data:', e)
 
 
     def save_to_drive(self, file):
-        # temp = self.objCommon.drop_extra_columns(temp, self.fixed_columns)
-        name_of_file = file.split('csv/')[1]
-        # temp.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
-        destination = os.getcwd() + '/Investing/sample_data/' + name_of_file
-        #resolution_type = self.get_resolution_type(name_of_file)
-        folder_id = self.get_folder_id(file)
-        service = self.objGAPI.intiate_gdAPI()
-        # Search file id to check it is exists or not
-        # def search_file(service, file_name, mime_type, folder_id, search_in_folder=False):
-        file_id = self.objGAPI.search_file(service, str(name_of_file), 'text/csv', folder_id, True)
-        if type(file_id) is int:
-            self.objGAPI.upload_file(service, str(name_of_file), destination, folder_id, 'text/csv')
-        if type(file_id) is str:
-            self.objGAPI.delete_file(service, file_id)
-            time.sleep(1)
-            self.objGAPI.upload_file(service, str(name_of_file), destination, folder_id, 'text/csv')
+        try:
+            # temp = self.objCommon.drop_extra_columns(temp, self.fixed_columns)
+            name_of_file = file.split('csv/')[1]
+            # temp.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
+            destination = os.getcwd() + '/Investing/sample_data/' + name_of_file
+            #resolution_type = self.get_resolution_type(name_of_file)
+            folder_id = self.get_folder_id(file)
+            service = self.objGAPI.intiate_gdAPI()
+            # Search file id to check it is exists or not
+            # def search_file(service, file_name, mime_type, folder_id, search_in_folder=False):
+            file_id = self.objGAPI.search_file(service, str(name_of_file), 'text/csv', folder_id, True)
+            if type(file_id) is int:
+                self.objGAPI.upload_file(service, str(name_of_file), destination, folder_id, 'text/csv')
+            if type(file_id) is str:
+                self.objGAPI.delete_file(service, file_id)
+                time.sleep(1)
+                self.objGAPI.upload_file(service, str(name_of_file), destination, folder_id, 'text/csv')
+        except Exception as e:
+            print('Exception in saving data on drive:', e)
 
     def save_to_drive_at_once(self):
         for file in glob.glob('sample_data/*.csv'):

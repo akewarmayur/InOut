@@ -79,28 +79,35 @@ class ProcessIn:
         return df_new
 
     def process(self, service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file):
-        # Download File in Local directory
-        if self.first == True:
-            self.objGAPI.download_files(service, file_to_save, file_id, False)
-        previous_data = pd.read_csv(file_to_save, parse_dates=['datetime'])
-        end_date = self.objHelp.get_end_date(previous_data)
-        status = self.objScrap.scrap(URL, PID, symbl, item, end_date, no_of_days[i])
-        if status == True:
-            current_data = pd.read_csv(file, parse_dates=['datetime'])
-            current_data.head()
-            data = self.concate(previous_data, current_data)
-            # data.reset_index(drop=True, inplace=True)
-            if len(current_data) <= 20:
-                candles_to_notify_from = len(current_data)
+        try:
+            # Download File in Local directory
+            if self.first == True:
+                self.objGAPI.download_files(service, file_to_save, file_id, False)
+            previous_data = pd.read_csv(file_to_save, parse_dates=['datetime'])
+            end_date = self.objHelp.get_end_date(previous_data)
+            status = self.objScrap.scrap(URL, PID, symbl, item, end_date, no_of_days[i])
+            if status == True:
+                current_data = pd.read_csv(file, parse_dates=['datetime'])
+                current_data.head()
+                data = self.concate(previous_data, current_data)
+                # data.reset_index(drop=True, inplace=True)
+                if len(current_data) <= 20:
+                    candles_to_notify_from = len(current_data)
+                else:
+                    candles_to_notify_from = 20
+                notify_df = self.get_slice(data, 200 + candles_to_notify_from)
+                self.objHelpIn.notifications(notify_df, candles_to_notify_from)
+                data = self.objCommon.drop_extra_columns(data, self.fixed_columns)
+                name_of_file = file.split('csv/')[1]
+                data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
+                if self.iterations == 10:
+                    self.objHelp.save_to_drive(file)
+                return True
             else:
-                candles_to_notify_from = 20
-            notify_df = self.get_slice(data, 200 + candles_to_notify_from)
-            self.objHelpIn.notifications(notify_df, candles_to_notify_from)
-            data = self.objCommon.drop_extra_columns(data, self.fixed_columns)
-            name_of_file = file.split('csv/')[1]
-            data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
-            if self.iterations == 10:
-                self.objHelp.save_to_drive(file)
+                return False
+        except Exception as e:
+            print('Exception in Scrapping & Saving data:', e)
+            return False
 
 
     def start(self, machine_name):
@@ -149,33 +156,37 @@ class ProcessIn:
                                     # URL, PID, symbl, row, end_date, no_of_days)
                                     status = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
                                     # calculate indicators and upload to drive
-                                    data = pd.read_csv(file, parse_dates=['datetime'])
-
-                                    # data.reset_index(drop=True, inplace=True)
-
-                                    data = self.objScrap.cal_indicators(data, ha=True, all=True)
-                                    # data = objIndicators.cal_heiken_ashi(data)
-                                    candles_to_notify_from = 20
-                                    notify_df = self.get_slice(data, 200 + candles_to_notify_from)
-                                    self.objHelpIn.notifications(notify_df, candles_to_notify_from)
-                                    name_of_file = file.split('csv/')[1]
-                                    data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
-                                    self.objHelp.save_to_drive(file)
+                                    if status == True:
+                                        data = pd.read_csv(file, parse_dates=['datetime'])
+                                        # data.reset_index(drop=True, inplace=True)
+                                        data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                        # data = objIndicators.cal_heiken_ashi(data)
+                                        candles_to_notify_from = 20
+                                        notify_df = self.get_slice(data, 200 + candles_to_notify_from)
+                                        self.objHelpIn.notifications(notify_df, candles_to_notify_from)
+                                        name_of_file = file.split('csv/')[1]
+                                        data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
+                                        self.objHelp.save_to_drive(file)
+                                    else:
+                                        print('No data available in the given range')
 
                                 elif isDataAvailable == True:
                                     if resolution == 'W':
                                         if datetime.date.today().isoweekday() == 1:
-                                            self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                            status = self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                            if status == False:
+                                                print('No Data available in the given range of date')
                                     if resolution == 'D':
                                         strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                                         strcurrentDateTime = strcurrentDateTime.replace(':', '.')
                                         if (float(strcurrentDateTime) < float('15.00')) or (float(strcurrentDateTime) < float('15.30')):
-                                            self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                            status = self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                            if status == False:
+                                                print('No Data available in the given range of date')
                                     if resolution == 5 or resolution == 15 or resolution == 30:
-                                        self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
-
-                                    else:
-                                        print('No Data available in the given range of date')
+                                        status = self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                        if status == False:
+                                            print('No Data available in the given range of date')
 
                                 else:
                                     print('Something is Wrong, Try Again')
@@ -203,37 +214,43 @@ class ProcessIn:
                             if isDataAvailable == False:
                                 # URL, PID, symbl, row, end_date, no_of_days)
                                 status = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
-                                # calculate indicators and upload to drive
-                                data = pd.read_csv(file, parse_dates=['datetime'])
+                                if status == True:
+                                    # calculate indicators and upload to drive
+                                    data = pd.read_csv(file, parse_dates=['datetime'])
 
-                                # data.reset_index(drop=True, inplace=True)
+                                    # data.reset_index(drop=True, inplace=True)
 
-                                data = self.objScrap.cal_indicators(data, ha=True, all=True)
-                                # data = objIndicators.cal_heiken_ashi(data)
-                                candles_to_notify_from = 20
-                                notify_df = self.get_slice(data, 200 + candles_to_notify_from)
-                                self.objHelpIn.notifications(notify_df, candles_to_notify_from)
-                                name_of_file = file.split('csv/')[1]
-                                data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
-                                self.objHelp.save_to_drive(file)
+                                    data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                    # data = objIndicators.cal_heiken_ashi(data)
+                                    candles_to_notify_from = 20
+                                    notify_df = self.get_slice(data, 200 + candles_to_notify_from)
+                                    self.objHelpIn.notifications(notify_df, candles_to_notify_from)
+                                    name_of_file = file.split('csv/')[1]
+                                    data.to_csv(os.getcwd() + '/Investing/sample_data/' + name_of_file, index=False)
+                                    self.objHelp.save_to_drive(file)
+                                else:
+                                    print('No Data available in the given range of date')
 
                             elif isDataAvailable == True:
                                 if resolution == 'W':
                                     if datetime.date.today().isoweekday() == 1:
-                                        self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                        status = self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                        if status == False:
+                                            print('No Data available in the given range of date')
                                 if resolution == 'D':
                                     strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                                     strcurrentDateTime = strcurrentDateTime.replace(':', '.')
                                     if (float(strcurrentDateTime) < float('9.30')) or (float(strcurrentDateTime) < float('09.30')):
-                                        self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                        status = self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                        if status == False:
+                                            print('No Data available in the given range of date')
                                 if resolution == 5 or resolution == 15 or resolution == 30:
-                                    self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
-                                else:
-                                    print('No Data available in the given range of date')
-
+                                    status = self.process(service, file_to_save, file_id, URL, PID, symbl, item, no_of_days, i, file)
+                                    if status == False:
+                                        print('No Data available in the given range of date')
                             else:
                                 print('Something is Wrong, Try Again')
 
             except Exception as e:
-                print(e)
+                print('Exception in Investing Scrapping proocess:', e)
 

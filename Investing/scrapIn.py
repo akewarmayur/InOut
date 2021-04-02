@@ -34,43 +34,47 @@ class ScrapData:
     def scrap(self, URL, PID, symbl, row, end_date, no_of_days):
         status = False
         no_of_days = int(no_of_days)
-        if 'CONFIG_5MIN' == row:
-            if end_date == 0:
-                status = self.read_url(URL, PID, 5, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
-            else:
-                status = self.read_url(URL, PID, 5, end_date, self.objHelp.cnvNumber(), symbl)
-        elif 'CONFIG_15MIN' == row:
-            if end_date == 0:
-                status = self.read_url(URL, PID, 15, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
-            else:
-                status = self.read_url(URL, PID, 15, end_date, self.objHelp.cnvNumber(), symbl)
-        elif 'CONFIG_30MIN' == row:
-            if end_date == 0:
-                status = self.read_url(URL, PID, 30, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
-            else:
-                status = self.read_url(URL, PID, 30, end_date, self.objHelp.cnvNumber(), symbl)
-        elif 'CONFIG_2H' == row:
-            if end_date == 0:
-                status = self.read_url(URL, PID, 120, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
-            else:
-                status = self.read_url(URL, PID, 120, end_date, self.objHelp.cnvNumber(), symbl)
-        elif 'CONFIG_1D' == row:
-            if end_date == 0:
-                status = self.read_url(URL, PID, 'D', self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
-            else:
-                status = self.read_url(URL, PID, 'D', end_date, self.objHelp.cnvNumber(), symbl)
-        elif 'CONFIG_1W' == row:
-            if end_date == 0:
-                status = self.read_url(URL, PID, 'W', self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
-            else:
-                status = self.read_url(URL, PID, 'W', end_date, self.objHelp.cnvNumber(), symbl)
-        elif 'CONFIG_1M' == row:
-            if end_date == 0:
-                status = self.read_url(URL, PID, 'M', self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
-            else:
-                status = self.read_url(URL, PID, 'M', end_date, self.objHelp.cnvNumber(), symbl)
+        try:
+            if 'CONFIG_5MIN' == row:
+                if end_date == 0:
+                    status = self.read_url(URL, PID, 5, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
+                else:
+                    status = self.read_url(URL, PID, 5, end_date, self.objHelp.cnvNumber(), symbl)
+            elif 'CONFIG_15MIN' == row:
+                if end_date == 0:
+                    status = self.read_url(URL, PID, 15, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
+                else:
+                    status = self.read_url(URL, PID, 15, end_date, self.objHelp.cnvNumber(), symbl)
+            elif 'CONFIG_30MIN' == row:
+                if end_date == 0:
+                    status = self.read_url(URL, PID, 30, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
+                else:
+                    status = self.read_url(URL, PID, 30, end_date, self.objHelp.cnvNumber(), symbl)
+            elif 'CONFIG_2H' == row:
+                if end_date == 0:
+                    status = self.read_url(URL, PID, 120, self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
+                else:
+                    status = self.read_url(URL, PID, 120, end_date, self.objHelp.cnvNumber(), symbl)
+            elif 'CONFIG_1D' == row:
+                if end_date == 0:
+                    status = self.read_url(URL, PID, 'D', self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
+                else:
+                    status = self.read_url(URL, PID, 'D', end_date, self.objHelp.cnvNumber(), symbl)
+            elif 'CONFIG_1W' == row:
+                if end_date == 0:
+                    status = self.read_url(URL, PID, 'W', self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
+                else:
+                    status = self.read_url(URL, PID, 'W', end_date, self.objHelp.cnvNumber(), symbl)
+            elif 'CONFIG_1M' == row:
+                if end_date == 0:
+                    status = self.read_url(URL, PID, 'M', self.objHelp.cnvNumberWithDate(no_of_days), self.objHelp.cnvNumber(), symbl)
+                else:
+                    status = self.read_url(URL, PID, 'M', end_date, self.objHelp.cnvNumber(), symbl)
 
-        return status
+            return status
+        except Exception as e:
+            print('Exception in scrapping data:', e)
+            return status
 
 
 
@@ -79,11 +83,16 @@ class ScrapData:
             # print('fromValue:', fromValue)
             # print('toValue:', toValue)
             url = URL+'symbol='+str(symbol)+'&resolution='+str(resolution)+'&from='+str(fromValue)+'&to='+str(toValue)
-            print(url)
+            #print(url)
             response = requests.get(url, headers=self.USER_AGENT)
             res = ast.literal_eval(response.text)
-            print('********', res)
-
+            if res['s'] == "no_data":
+                fromValue = abs(fromValue - 19800)
+                url = URL + 'symbol=' + str(symbol) + '&resolution=' + str(resolution) + '&from=' + str(fromValue) + '&to=' + str(toValue)
+                response = requests.get(url, headers=self.USER_AGENT)
+                res = ast.literal_eval(response.text)
+                if res['s'] == "no_data":
+                    return False
             try:
               del res['vo']
             except:
@@ -112,23 +121,27 @@ class ScrapData:
             return False
 
     def cal_indicators(self, temp, ha=False, all=True):
-        if all == True:
-            # print(temp.head(2))
-            temp.ta.strategy(self.objIndicators.CustomStrategy)
+        try:
+            if all == True:
+                # print(temp.head(2))
+                temp.ta.strategy(self.objIndicators.CustomStrategy)
 
-        # calculate custom indicators
-        temp = self.objIndicators.custom_indicators(temp, 'per_change')
+            # calculate custom indicators
+            temp = self.objIndicators.custom_indicators(temp, 'per_change')
 
-        temp = self.objIndicators.custom_indicators(temp, 'volume_high_count')
+            temp = self.objIndicators.custom_indicators(temp, 'volume_high_count')
 
-        temp = self.objIndicators.custom_indicators(temp, 'close_count')
+            temp = self.objIndicators.custom_indicators(temp, 'close_count')
 
-        temp = self.objIndicators.custom_indicators(temp, 'per_change_count')
+            temp = self.objIndicators.custom_indicators(temp, 'per_change_count')
 
-        if ha == True:
-            temp = self.objIndicators.cal_heiken_ashi(temp)
+            if ha == True:
+                temp = self.objIndicators.cal_heiken_ashi(temp)
 
-        return temp
+            return temp
+        except Exception as e:
+            print('Exception in calculating Indicators:', e)
+            return temp
 
 
 
