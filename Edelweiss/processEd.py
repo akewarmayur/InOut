@@ -165,7 +165,7 @@ class ProcessEd:
                 while True:
                     strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                     strcurrentTime = strcurrentTime.replace(':', '.')
-                    if float(strcurrentTime) > float(15.30):
+                    if float(strcurrentTime) > float(20.30):
                         print('Market is not ON. Try tomorrow or change isMarketON flag')
                         break
                     for symbol, indices_or_stocks in diction.items():

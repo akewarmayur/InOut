@@ -52,9 +52,11 @@ class ScrapData:
                     COI = j['ceQt']['opIntChg']
                     IV = j['ceQt']['ltpivfut']
                     VOL = j['ceQt']['vol']
-                    df.loc[
-                        ctr] = scripName, strikePrice, optionType, strcurrentDateTime, currentDateTime, ExpiryDate, strExpiryDate, float(
-                        OI), float(COI), float(IV), int(VOL)
+                    COI = float(COI)
+                    if COI != 0.0:
+                        df.loc[
+                            ctr] = scripName, strikePrice, optionType, strcurrentDateTime, currentDateTime, ExpiryDate, strExpiryDate, float(
+                            OI), COI, float(IV), int(VOL)
                     ctr = ctr + 1
 
                 if (j['peQt']['trdSym'][-2:] == 'PE'):
@@ -68,9 +70,11 @@ class ScrapData:
                     COI = j['peQt']['opIntChg']
                     IV = j['peQt']['ltpivfut']
                     VOL = j['peQt']['vol']
-                    df.loc[
-                        ctr] = scripName, strikePrice, optionType, strcurrentDateTime, currentDateTime, ExpiryDate, strExpiryDate, float(
-                        OI), float(COI), float(IV), int(VOL)
+                    COI = float(COI)
+                    if COI != 0.0:
+                        df.loc[
+                            ctr] = scripName, strikePrice, optionType, strcurrentDateTime, currentDateTime, ExpiryDate, strExpiryDate, float(
+                            OI), COI, float(IV), int(VOL)
             df.to_csv(file_saved_as, index=False)
             # print(df.head(2))
             print(strcurrentDateTime)
