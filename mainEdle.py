@@ -7,6 +7,8 @@ from queue import Queue
 from common.sheetOperations import SheetOps
 from Edelweiss.scrapEd import ScrapData
 import time
+import warnings
+warnings.filterwarnings("ignore")
 
 class EdleMain:
     def __init__(self):
@@ -34,8 +36,6 @@ class EdleMain:
 
             for i, s in enumerate(symbol):
                 diction[s] = indices_or_stocks[i]
-
-            print(symbol)
 
             return isMarketON, symbol, diction
         except Exception as e:
@@ -69,12 +69,16 @@ if __name__ == '__main__':
     objpEd = ProcessEd()
     objMain = EdleMain()
     machine_name = args.machine_name
+    #machine_name = 'Mayur'
 
     q = Queue(maxsize=0)
     # Use many threads (50 max, or one for each url)
     isMarketON, symbol, diction = objMain.get_symbol_list(machine_name)
     expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly = objMain.get_expiry_dates()
     objMain.create_folders(expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly)
+
+    # symbol = symbol[:1]
+    print(symbol)
 
     num_theads = len(symbol)
 
