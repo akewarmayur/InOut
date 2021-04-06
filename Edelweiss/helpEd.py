@@ -97,14 +97,14 @@ class HelpEd:
             # df['Flag'] = False
             # print(df.head())
             for i, j in enumerate(PE):
-                temp = df[df['StrikePrice'] == j]
+                temp = df[(df.StrikePrice == j) & (df.OptionType == 'PE')]
                 temp = self.cal_change_OI(temp, current_time, symbol, dt, 'PE')
                 # cal_outliers1(j, temp['OI_change'].tolist())
                 for a, row in temp.iterrows():
                     df['OI_change'].iloc[a] = row['OI_change']
                     df['Flag'].iloc[a] = row['Flag']
             for i, j in enumerate(CE):
-                temp = df[df['StrikePrice'] == j]
+                temp = df[(df.StrikePrice == j) & (df.OptionType == 'CE')]
                 temp = self.cal_change_OI(temp, current_time, symbol, dt, 'CE')
                 # print(temp)
                 for a, row in temp.iterrows():

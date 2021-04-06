@@ -120,7 +120,7 @@ class ProcessEd(threading.Thread):
                         print('******************* Iterations : ', ns.iterations)
                         strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                         strcurrentTime = strcurrentTime.replace(':', '.')
-                        if float(strcurrentTime) > float(15.35):
+                        if float(strcurrentTime) > float(15.30):
                             print('Market is not ON. Try tomorrow or change isMarketON flag')
                             break
                         if diction[work[1]] == 'FALSE':
