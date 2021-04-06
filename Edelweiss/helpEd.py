@@ -52,10 +52,12 @@ class HelpEd:
                 anomalies.append(outlier)
         return anomalies
 
-    def cal_change_OI(self, df, current_time, symbol, dt):
+    def cal_change_OI(self, df, current_time, symbol, dt, option_type):
         try:
-            df['OI_change'] = 0
-            df['Flag'] = False
+            col = df.columns.tolist()
+            if 'OI_change' not in col:
+                df['OI_change'] = 0
+                df['Flag'] = False
             df_length = len(df.index)
             # print(list_ofchangeOI)
 
@@ -72,34 +74,46 @@ class HelpEd:
                 for x, y in enumerate(list_ofchangeOI):
                     for a, b in enumerate(anomalies):
                         if b == y:
+                            if df['Flag'].iloc[x] == True:
+                                self.notify_process(df, x, symbol, dt, option_type)
                             df['Flag'].iloc[x] = True
                             if df['StrTradeDateTime'].iloc[x] == current_time:
-                                self.notify_process(df, x, symbol, dt)
+                                self.notify_process(df, x, symbol, dt, option_type)
             return df
         except Exception as e:
             print('Exception in changeOI calculation:', e)
 
 
-    def cal_Out(self, df):
-        PE = list(df[df['OptionType'] == 'PE']['StrikePrice'].unique())
-        CE = list(df[df['OptionType'] == 'CE']['StrikePrice'].unique())
-        # print(dd)
-        df['OI_change'] = 0
-        df['Flag'] = False
-        # print(df.head())
-        for i, j in enumerate(PE):
-            temp = df[df['StrikePrice'] == j]
-            temp = self.cal_change_OI(temp)
-            # cal_outliers1(j, temp['OI_change'].tolist())
-            for a, row in temp.iterrows():
-                df['OI_change'].iloc[a] = row['OI_change']
-                df['Flag'].iloc[a] = row['Flag']
-        for i, j in enumerate(CE):
-            temp = df[df['StrikePrice'] == j]
-            temp = self.cal_change_OI(temp)
-            # print(temp)
-            for a, row in temp.iterrows():
-                df['OI_change'].iloc[a] = row['OI_change']
+    def cal_Out(self, df, current_time, symbol, dt):
+        try:
+            PE = list(df[df['OptionType'] == 'PE']['StrikePrice'].unique())
+            CE = list(df[df['OptionType'] == 'CE']['StrikePrice'].unique())
+            # print(dd)
+            col = df.columns.tolist()
+            if 'OI_change' not in col:
+                df['OI_change'] = 0
+                df['Flag'] = False
+            # df['OI_change'] = 0
+            # df['Flag'] = False
+            # print(df.head())
+            for i, j in enumerate(PE):
+                temp = df[df['StrikePrice'] == j]
+                temp = self.cal_change_OI(temp, current_time, symbol, dt, 'PE')
+                # cal_outliers1(j, temp['OI_change'].tolist())
+                for a, row in temp.iterrows():
+                    df['OI_change'].iloc[a] = row['OI_change']
+                    df['Flag'].iloc[a] = row['Flag']
+            for i, j in enumerate(CE):
+                temp = df[df['StrikePrice'] == j]
+                temp = self.cal_change_OI(temp, current_time, symbol, dt, 'CE')
+                # print(temp)
+                for a, row in temp.iterrows():
+                    df['OI_change'].iloc[a] = row['OI_change']
+                    df['Flag'].iloc[a] = row['Flag']
+            return df
+        except Exception as e:
+            print('Exception in OUT calculation:', e)
+            return df
 
     def concate(self, previous_df, df_now, first=True):
         if first == True:
@@ -121,30 +135,41 @@ class HelpEd:
 
     def outliers_notify(self, df_now, previous_df, current_time, symbol, dt):
         try:
-            if len(previous_df) >= edleConfig.no_of_past_instruments:
-                value_list = list(previous_df['StrTradeDateTime'].unique())[:edleConfig.no_of_past_instruments]
-                boolean_series = previous_df.StrTradeDateTime.isin(value_list)
-                p_df = previous_df[boolean_series]
+            col = previous_df.columns.tolist()
+            if 'OI_change' in col:
+                if len(previous_df) >= edleConfig.no_of_past_instruments:
+                    value_list = list(previous_df['StrTradeDateTime'].unique())[:edleConfig.no_of_past_instruments]
+                    boolean_series = previous_df.StrTradeDateTime.isin(value_list)
+                    p_df = previous_df[boolean_series]
+                else:
+                    p_df = previous_df
+                # p_df = p_df.loc[:, :'VOL']
+                df_op = self.concate(p_df, df_now)
+                # new_df = self.cal_change_OI(df_op, current_time, symbol, dt)
+                new_df = self.cal_Out(df_op, current_time, symbol, dt)
+                df_now = new_df[:len(df_now)]
+                result = self.concate(previous_df, df_now, False)
+                return result
             else:
-                p_df = previous_df
-            p_df = p_df.loc[:, :'VOL']
-            df_op = self.concate(p_df, df_now)
-            new_df = self.cal_change_OI(df_op, current_time, symbol, dt)
-            df_now = new_df[:len(df_now)]
-            result = self.concate(previous_df, df_now, False)
-            return result
+                # previous_df = previous_df.loc[:, :'VOL']
+                df_op = self.concate(previous_df, df_now)
+                # new_df = self.cal_change_OI(df_op, current_time, symbol, dt)
+                new_df = self.cal_Out(df_op, current_time, symbol, dt)
+                # df_now = new_df[:len(df_now)]
+                # result = self.concate(df_op, df_now, False)
+                return new_df
         except Exception as e:
             print('Exception in outliers notify:', e)
             return previous_df
 
 
-    def notify_process(self, df, x, symbol, expiry_date):
+    def notify_process(self, df, x, symbol, expiry_date, option_type):
         try:
             old_COI = df['COI'].iloc[x + 1]
             current_coi = df['COI'].iloc[x]
             dt = df['StrTradeDateTime'].iloc[x]
             s = df['StrikePrice'].iloc[x]
-            option_type = df['OptionType'].iloc[0]
+            # option_type = df['OptionType'].iloc[0]
             list_to_write = [dt, symbol, expiry_date, option_type, s, old_COI, current_coi]
             self.objSheet.writeSheet('CIEnotifications', list_to_write, 'EdelweissNotify')
         except Exception as e:

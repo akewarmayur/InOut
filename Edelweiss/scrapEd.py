@@ -78,10 +78,10 @@ class ScrapData:
             df.to_csv(file_saved_as, index=False)
             # print(df.head(2))
             print(strcurrentDateTime)
-            return file_saved_as
+            return file_saved_as, df
         except Exception as e:
             print("In Exception ", e)
-            return file_saved_as
+            return file_saved_as, df
 
     def get_expiry_dates(self):
         try:

@@ -72,35 +72,40 @@ class ProcessEd(threading.Thread):
                 service = objGAPI.intiate_gdAPI()
                 folderID = objGAPI.search_file(service, str(dt), '', '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA', True)
 
-                file = objScrap.start_scraping(str(symbol), dt)
-                name_of_file = file.split('csv/')[1]
-                # Upload to drive
-                # Check if data historical data is available on the drive
-                isDataAvailable, file_id = objCommon.check_previous_data_exist(file, folderID)
-                if isDataAvailable == False:
-                    self.save_to_drive(folderID, name_of_file, file)
+                file, df = objScrap.start_scraping(str(symbol), dt)
+                if not df.empty:
+                    name_of_file = file.split('csv/')[1]
+                    # Upload to drive
+                    # Check if data historical data is available on the drive
+                    isDataAvailable, file_id = objCommon.check_previous_data_exist(file, folderID)
+                    if isDataAvailable == False:
+                        self.save_to_drive(folderID, name_of_file, file)
+                    else:
+                        df_now = pd.read_csv(os.getcwd() + '/Edelweiss/csv/' + name_of_file)
+                        current_time = list(df_now['StrTradeDateTime'].unique())[0]
+                        if iterations < 2:
+                            # Download file
+                            file_to_save = os.getcwd() + '/Edelweiss/d_csv/' + name_of_file
+                            objGAPI.download_files(service, file_to_save, file_id, False)
+                            previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + name_of_file)
+                        else:
+                            previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
+
+                        # Notify Outliers if any
+                        past_time = list(previous_df['StrTradeDateTime'].unique())
+
+                        if len(past_time) < edleConfig.no_of_past_instruments:
+                            result_df = self.concate(previous_df, df_now)
+                        else:
+                            # objHelpEd.outliers_notify(result_df, symbol, dt)
+                            result_df = objHelpEd.outliers_notify(df_now, previous_df, current_time, symbol, dt)
+                        result_df.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file, index=False)
+                        if iterations < 2 or iterations == 5:
+                            self.save_to_drive(folderID, name_of_file, os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
+                    return True
                 else:
-                    df_now = pd.read_csv(os.getcwd() + '/Edelweiss/csv/' + name_of_file)
-                    current_time = list(df_now['StrTradeDateTime'].unique())[0]
-                    if iterations < 2:
-                        # Download file
-                        file_to_save = os.getcwd() + '/Edelweiss/d_csv/' + name_of_file
-                        objGAPI.download_files(service, file_to_save, file_id, False)
-                        previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + name_of_file)
-                    else:
-                        previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
-
-                    # Notify Outliers if any
-                    past_time = list(previous_df['StrTradeDateTime'].unique())
-
-                    if len(past_time) < edleConfig.no_of_past_instruments:
-                        result_df = self.concate(previous_df, df_now)
-                    else:
-                        # objHelpEd.outliers_notify(result_df, symbol, dt)
-                        result_df = objHelpEd.outliers_notify(df_now, previous_df, current_time, symbol, dt)
-                    result_df.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + name_of_file, index=False)
-                    if iterations < 2 or iterations == 5:
-                        self.save_to_drive(folderID, name_of_file, os.getcwd() + '/Edelweiss/sample_data/' + name_of_file)
+                    print(f"Scrapping df empty for : {symbol}")
+                    return False
         except Exception as e:
             print('Exception in Edle Scrapping Process:', e)
 
@@ -119,11 +124,12 @@ class ProcessEd(threading.Thread):
                             print('Market is not ON. Try tomorrow or change isMarketON flag')
                             break
                         if diction[work[1]] == 'FALSE':
-                            self.process(work[1], expiry_date_indices_monthly, ns.iterations)
-                            self.process(work[1], expiry_date_indices_weekly, ns.iterations)
+                            status = self.process(work[1], expiry_date_indices_monthly, ns.iterations)
+                            status = self.process(work[1], expiry_date_indices_weekly, ns.iterations)
                         else:
-                            self.process(work[1], expiry_date_stocks, ns.iterations)
-                        ns.iterations += 1
+                            status = self.process(work[1], expiry_date_stocks, ns.iterations)
+                        if status == True:
+                            ns.iterations += 1
                         if ns.iterations == 5:
                             ns.iterations = 0
                             # self.first = True
@@ -135,10 +141,10 @@ class ProcessEd(threading.Thread):
                     strcurrentDateTime = strcurrentDateTime.replace(':', '.')
                     if float(strcurrentDateTime) >= float(09.15) and float(strcurrentDateTime) <= float(17.00):
                         if diction[work[1]] == 'FALSE':
-                            self.process(work[1], expiry_date_indices_monthly, it)
-                            self.process(work[1], expiry_date_indices_weekly, it)
+                            status = self.process(work[1], expiry_date_indices_monthly, it)
+                            status = self.process(work[1], expiry_date_indices_weekly, it)
                         else:
-                            self.process(work[1], expiry_date_stocks, it)
+                            status = self.process(work[1], expiry_date_stocks, it)
                     else:
                         print('Market is not ON, So no new data is Available')
 
