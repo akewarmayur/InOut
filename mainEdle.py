@@ -8,6 +8,7 @@ from common.sheetOperations import SheetOps
 from Edelweiss.scrapEd import ScrapData
 import time
 import warnings
+import config
 warnings.filterwarnings("ignore")
 
 class EdleMain:
@@ -43,32 +44,38 @@ class EdleMain:
 
     def create_folders(self, expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly):
         print('Creating Folders .....')
+        if config.env == 'QA':
+            fo_id = '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con'
+        else:
+            fo_id = '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA'
         try:
             for dt in expiry_date_stocks:
                 service = self.objGAPI.intiate_gdAPI()
-                folderID = self.objGAPI.search_file(service, str(dt), '', '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA', True)
+                folderID = self.objGAPI.search_file(service, str(dt), '', fo_id, True)
                 if folderID == 0:
-                    folderID = self.objGAPI.createFolder(service, str(dt), '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
+                    folderID = self.objGAPI.createFolder(service, str(dt), fo_id)
             for dt in expiry_date_indices_monthly:
                 service = self.objGAPI.intiate_gdAPI()
-                folderID = self.objGAPI.search_file(service, str(dt), '', '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA', True)
+                folderID = self.objGAPI.search_file(service, str(dt), '', fo_id, True)
                 if folderID == 0:
-                    folderID = self.objGAPI.createFolder(service, str(dt), '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
+                    folderID = self.objGAPI.createFolder(service, str(dt), fo_id)
             for dt in expiry_date_indices_weekly:
                 service = self.objGAPI.intiate_gdAPI()
-                folderID = self.objGAPI.search_file(service, str(dt), '', '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA', True)
+                folderID = self.objGAPI.search_file(service, str(dt), '', fo_id, True)
                 if folderID == 0:
-                    folderID = self.objGAPI.createFolder(service, str(dt), '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
+                    folderID = self.objGAPI.createFolder(service, str(dt), fo_id)
         except Exception as e:
             print('Exception in creating folder:', e)
 
 if __name__ == '__main__':
     my_parser = argparse.ArgumentParser()
     my_parser.add_argument('--machine_name', action='store', type=str, required=True)
+    my_parser.add_argument('--env', action='store', type=str, required=True)
     args = my_parser.parse_args()
     objpEd = ProcessEd()
     objMain = EdleMain()
     machine_name = args.machine_name
+    config.env = args.env
     #machine_name = 'Mayur'
 
     q = Queue(maxsize=0)

@@ -2,6 +2,7 @@ import numpy as np
 from common.sheetOperations import SheetOps
 import Edelweiss.edleConfig as edleConfig
 from common.common import CommonFunctions
+import config
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -35,19 +36,21 @@ class HelpEd:
     #     except Exception as e:
     #         print('Exception in changeOI calculation:', e)
 
-    def cal_outliers(self, data):
+    def cal_outliers(self, data, list_ofOI):
         anomalies = []
 
+        Data_ChOI = [item for item in data if item != 0.0 or item!= 0]
+        Data_OI = [item for item in list_ofOI if item != 0.0 or item != 0]
         # Set upper and lower limit to 3 standard deviation
-        random_data_std = np.std(data)
-        random_data_mean = np.mean(data)
+        random_data_std = np.std(Data_ChOI)
+        random_data_mean = np.mean(Data_ChOI)
         anomaly_cut_off = random_data_std * 2
 
         lower_limit = random_data_mean - anomaly_cut_off
         upper_limit = random_data_mean + anomaly_cut_off
 
         # Generate outliers
-        for outlier in data:
+        for outlier in Data_OI:
             if outlier > upper_limit or outlier < lower_limit:
                 anomalies.append(outlier)
         return anomalies
@@ -69,7 +72,8 @@ class HelpEd:
                 else:
                     df['OI_change'].iloc[i] = 0
             list_ofchangeOI = df['OI_change'].tolist()
-            anomalies = self.cal_outliers(list_ofchangeOI)
+            list_ofOI = df['OI'].tolist()
+            anomalies = self.cal_outliers(list_ofchangeOI, list_ofOI)
             if len(anomalies) != 0:
                 for x, y in enumerate(list_ofchangeOI):
                     for a, b in enumerate(anomalies):
@@ -164,6 +168,10 @@ class HelpEd:
 
 
     def notify_process(self, df, x, symbol, expiry_date, option_type):
+        if config.env == 'QA':
+            sheet_to_notify = 'EdelNotifyQA'
+        else:
+            sheet_to_notify = 'EdelweissNotify'
         try:
             old_COI = df['COI'].iloc[x + 1]
             current_coi = df['COI'].iloc[x]
@@ -171,7 +179,7 @@ class HelpEd:
             s = df['StrikePrice'].iloc[x]
             # option_type = df['OptionType'].iloc[0]
             list_to_write = [dt, symbol, expiry_date, option_type, s, old_COI, current_coi]
-            self.objSheet.writeSheet('CIEnotifications', list_to_write, 'EdelweissNotify')
+            self.objSheet.writeSheet('CIEnotifications', list_to_write, sheet_to_notify)
         except Exception as e:
             print('Exception in outliers Notification Process:', e)
 
