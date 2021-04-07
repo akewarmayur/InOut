@@ -54,7 +54,7 @@ class ProcessEd(threading.Thread):
                 objGAPI.upload_file(service, str(name_of_file), destination, folder_id, 'text/csv')
             if type(file_id) is str:
                 objGAPI.delete_file(service, file_id)
-                time.sleep(1)
+                # time.sleep(1)
                 objGAPI.upload_file(service, str(name_of_file), destination, folder_id, 'text/csv')
             return True
         except Exception as e:

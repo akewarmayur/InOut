@@ -104,7 +104,7 @@ if __name__ == '__main__':
         # exit eventually even if these dont finish
         # correctly.
         worker.start()
-        time.sleep(1.2)
+        time.sleep(1)
     # now we wait until the queue has been processed
     q.join()
     logging.info('All tasks completed.')
