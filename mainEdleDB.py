@@ -113,16 +113,16 @@ class MainEdle:
 
 
 if __name__ == '__main__':
-    # my_parser = argparse.ArgumentParser()
-    # my_parser.add_argument('--machine_name', action='store', type=str, required=True)
-    # my_parser.add_argument('--env', action='store', type=str, required=True)
-    # args = my_parser.parse_args()
+    my_parser = argparse.ArgumentParser()
+    my_parser.add_argument('--machine_name', action='store', type=str, required=True)
+    my_parser.add_argument('--env', action='store', type=str, required=True)
+    args = my_parser.parse_args()
     objpEd = ProcessEd()
     objMain = MainEdle()
-    # machine_name = args.machine_name
-    # config.env = args.env
-    config.env = 'PROD'
-    machine_name = 'Mayur'
+    machine_name = args.machine_name
+    config.env = args.env
+    # config.env = 'PROD'
+    # machine_name = 'Mayur'
     service = objMain.objGAPI.intiate_gdAPI()
     q = Queue(maxsize=0)
     # Use many threads (50 max, or one for each url)
@@ -175,6 +175,6 @@ if __name__ == '__main__':
     objMain.objGAPI.upload_file(service, 'edle.db', os.getcwd() + '/DB/edle.db', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
 
 
-obj = MainEdle()
+# obj = MainEdle()
 
 # obj.objHelpDB.get_sd_from_prev_day('ZEEL', 'stockDetails')
