@@ -34,6 +34,18 @@ class CommonFunctions:
             print('Exception while checking previous data exist', e)
             return None
 
+    def check_pdata_exist(self, name_of_file, folder_id):
+        try:
+            service = self.objGAPI.intiate_gdAPI()
+            file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", folder_id, True)
+            if type(file_id) is str:
+                return True, file_id
+            else:
+                return False, file_id
+        except Exception as e:
+            print('Exception while checking previous data exist', e)
+            return None
+
     def get_list_of_csv_files_in_folder(self, folder_name):
         list_of_files = []
         try:
@@ -84,4 +96,6 @@ class CommonFunctions:
         except Exception as e:
             print('Exception in getting list of outliers', e)
             return []
+
+
 

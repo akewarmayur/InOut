@@ -41,6 +41,7 @@ class GoogleAPI:
                     pickle.dump(self.creds, token)
 
             service = build('drive', 'v3', credentials=self.creds)
+            #build
             return service
         except Exception as e:
             print('Google Drive API connection Exception=>', e)
@@ -61,7 +62,7 @@ class GoogleAPI:
             file = service.files().create(body=file_metadata,
                                           media_body=media,
                                           fields='id').execute()
-            print('File ID: %s upload' % file.get('id'))
+            # print('File ID: %s upload' % file.get('id'))
             # print('File upload success')
         except Exception as e:
             print('file upload exception=>', e)

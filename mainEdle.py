@@ -45,7 +45,7 @@ class EdleMain:
     def create_folders(self, expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly):
         print('Creating Folders .....')
         if config.env == 'QA':
-            fo_id = '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con'
+            fo_id = '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA'
         else:
             fo_id = '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA'
         try:
