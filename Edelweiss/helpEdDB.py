@@ -106,8 +106,7 @@ class HelpEdDB:
                         f = f.replace(' ', '_')
                         name_of_file = str(key) + "_" + str(f) + ".csv"
                         file_saved_as = os.getcwd() + "/Edelweiss/d_csv/" + str(key) + "_" + str(f) + ".csv"
-                        file_id = self.objGAPI.search_file(service, name_of_file, "text/csv",
-                                                           '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA', True)
+                        file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
                         if file_id != 0:
                             self.objGAPI.download_files(service, file_saved_as, file_id, False)
 
@@ -115,7 +114,7 @@ class HelpEdDB:
                         f = f.replace(' ', '_')
                         name_of_file = str(key) + "_" + str(f) + ".csv"
                         file_saved_as = os.getcwd() + "/Edelweiss/d_csv/" + str(key) + "_" + str(f) + ".csv"
-                        file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA', True)
+                        file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
                         if file_id != 0:
                             self.objGAPI.download_files(service, file_saved_as, file_id, False)
                 else:
@@ -123,7 +122,7 @@ class HelpEdDB:
                         f = f.replace(' ', '_')
                         name_of_file = str(key) + "_" + str(f) + ".csv"
                         file_saved_as = os.getcwd() + "/Edelweiss/d_csv/" + str(key) + "_" + str(f) + ".csv"
-                        file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA', True)
+                        file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
                         if file_id != 0:
                             self.objGAPI.download_files(service, file_saved_as, file_id, False)
         except Exception as e:

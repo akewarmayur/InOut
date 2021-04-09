@@ -11,7 +11,7 @@ class DatabaseOp:
         DB_FILE = os.getcwd() + '/DB/' + config.DB_Name
         conn = None
         try:
-            conn = sqlite3.connect(DB_FILE, timeout=10)
+            conn = sqlite3.connect(DB_FILE, timeout=50)
             print(sqlite3.version)
         except Error as e:
             print(e)
@@ -24,7 +24,7 @@ class DatabaseOp:
         DB_FILE = os.getcwd() + '/DB/' + config.DB_Name
         conn = None
         try:
-            conn = sqlite3.connect(DB_FILE, timeout=10)
+            conn = sqlite3.connect(DB_FILE, timeout=50)
             return conn
         except Error as e:
             print(e)

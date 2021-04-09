@@ -78,6 +78,11 @@ class GoogleAPI:
                                                         spaces='drive',
                                                         fields='nextPageToken, files(id, name)',
                                                         pageToken=page_token).execute()
+                    elif mime_type == 'text/csv':
+                        response = service.files().list(q="mimeType='text/csv'",
+                                                        spaces='drive',
+                                                        fields='nextPageToken, files(id, name)',
+                                                        pageToken=page_token).execute()
                     elif mime_type == 'application/json':
                         response = service.files().list(q="mimeType='application/json'",
                                                         spaces='drive',
