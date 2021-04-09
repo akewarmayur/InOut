@@ -63,9 +63,9 @@ class HelpEdDB:
 
     def InsertThreshold(self, conn, ScripName, ExpiryDate, Threshold):
 
-        que = 'SELECT ScripName FROM Threshold WHERE ExpiryDate=?'
+        que = 'SELECT Threshold FROM Threshold WHERE ExpiryDate=? AND ScripName=?'
         cur = conn.cursor()
-        cur.execute(que, [ExpiryDate])
+        cur.execute(que, [ExpiryDate, ScripName])
         rows = cur.fetchone()
         if rows == None:
             self.objDBOP.insertThreshold(conn, ScripName, ExpiryDate, Threshold)

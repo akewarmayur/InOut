@@ -50,8 +50,6 @@ class ScrapData:
             print(pvTime)
         else:
             pvTime = ''
-
-        #Get Threshold
         que = 'SELECT Threshold FROM Threshold WHERE ScripName=? AND ExpiryDate=?'
         cur = conn.cursor()
         ed = expDate.replace(' ', '-')
@@ -74,8 +72,6 @@ class ScrapData:
         try:
             r = requests.post(url=self.url, timeout=20, headers=self.headers, data=data)
             jsons = r.json()['opChn']
-            #print(jsons)
-            # Init Dataframe to store Edelweiss values
             runCtr = runCtr + 1
             ctr = 0
             for j in jsons:
@@ -95,6 +91,7 @@ class ScrapData:
                     COI = float(COI)
                     if pvTime == '':
                         MOI = 0
+                        prevOI = ''
                     else:
                         timeDiff = float(strcurrentDateTime.replace(':', '.')) - float(pvTime.replace(':', '.'))
                         if timeDiff == 0.0:
@@ -108,13 +105,10 @@ class ScrapData:
                         else:
                             prevOI = ''
                             MOI = 0
-
-                    #Formula and calculate outlier
-
-
-                    #Notification
-                    if abs(float(MOI)) > float(threshold):
-                        self.notifications(currentDateTime, strikePrice, scripName, expDate, optionType, prevOI, OI)
+                        #Notification
+                        # threshold = 0.0
+                        if abs(float(MOI)) >= float(threshold):
+                            self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate, optionType, str(prevOI), str(OI))
 
                     if COI != 0.0:
                         self.objDB.insert(conn, currentDate, scripName, IndexORStocks, strikePrice, optionType, strcurrentDateTime, currentDateTime,
@@ -136,6 +130,7 @@ class ScrapData:
                     COI = float(COI)
                     if pvTime == '':
                         MOI = 0
+                        prevOI = ''
                     else:
                         timeDiff = float(strcurrentDateTime.replace(':', '.')) - float(pvTime.replace(':', '.'))
                         if timeDiff == 0.0:
@@ -149,12 +144,9 @@ class ScrapData:
                         else:
                             prevOI = ''
                             MOI = 0
-
-                    # Formula and calculate outlier
-
-                    # Notification
-                    if abs(float(MOI)) > float(threshold):
-                        self.notifications(currentDateTime, strikePrice, scripName, expDate, optionType, prevOI, OI)
+                        # Notification
+                        if abs(float(MOI)) > float(threshold):
+                            self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate, optionType, str(prevOI), str(OI))
 
                     if COI != 0.0:
                         self.objDB.insert(conn, currentDate, scripName, IndexORStocks, strikePrice, optionType, strcurrentDateTime,

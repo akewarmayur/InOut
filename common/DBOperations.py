@@ -1,18 +1,17 @@
 import sqlite3
 from sqlite3 import Error
 import os
+import config
 
 class DatabaseOp:
-
-    def __init__(self):
-        self.DB_FILE = os.getcwd() + '/DB/edle.db'
 
 
     def create_database(self):
         """ create a database connection to a SQLite database """
+        DB_FILE = os.getcwd() + '/DB/' + config.DB_Name
         conn = None
         try:
-            conn = sqlite3.connect(self.DB_FILE, timeout=10)
+            conn = sqlite3.connect(DB_FILE, timeout=10)
             print(sqlite3.version)
         except Error as e:
             print(e)
@@ -22,9 +21,10 @@ class DatabaseOp:
 
 
     def create_connection(self):
+        DB_FILE = os.getcwd() + '/DB/' + config.DB_Name
         conn = None
         try:
-            conn = sqlite3.connect(self.DB_FILE, timeout=10)
+            conn = sqlite3.connect(DB_FILE, timeout=10)
             return conn
         except Error as e:
             print(e)
