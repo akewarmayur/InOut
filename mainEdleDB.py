@@ -123,6 +123,8 @@ if __name__ == '__main__':
     config.env = args.env
     # config.env = 'PROD'
     # machine_name = 'Mayur'
+    config.machine_name = machine_name
+    config.DB_Name = machine_name + '.db'
     service = objMain.objGAPI.intiate_gdAPI()
     q = Queue(maxsize=0)
     # Use many threads (50 max, or one for each url)
@@ -131,11 +133,13 @@ if __name__ == '__main__':
     FolderIDs = objMain.create_folders(service, EDStocks, EDIndicesM, EDIndicesW)
     status = objMain.objHelpDB.downloadDB(service, EDStocks, EDIndicesM, EDIndicesW)
     # objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW)
-    #symbol_list = symbol_list[:1]
+    # symbol_list = symbol_list[:1]
 
     # Insert Thresholds from CSV
     dfThreshold = pd.read_csv(os.getcwd() + '/thresholds.csv')
     conn = objMain.objDBOP.create_connection()
+    objMain.objDBOP.create_tableThreshold(conn)
+    time.sleep(1)
     for i, row in dfThreshold.iterrows():
         Threshold = row['Threshold']
         ScripName = row['ScripName']
