@@ -133,7 +133,7 @@ if __name__ == '__main__':
     FolderIDs = objMain.create_folders(service, EDStocks, EDIndicesM, EDIndicesW)
     status = objMain.objHelpDB.downloadDB(service, EDStocks, EDIndicesM, EDIndicesW)
     objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW)
-    symbol_list = symbol_list[3:4]
+    #symbol_list = symbol_list[3:4]
     print(symbol_list)
 
     # Insert Thresholds from CSV
