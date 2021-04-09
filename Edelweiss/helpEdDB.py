@@ -75,7 +75,7 @@ class HelpEdDB:
 
     def downloadDB(self, service, expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly):
         try:
-            name_of_file = 'edle.db'
+            name_of_file = config.DB_Name
             file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con',
                                                True)
             if file_id == 0:
@@ -86,7 +86,7 @@ class HelpEdDB:
                 self.createTable(conn, expiry_date_indices_monthly)
                 self.createTable(conn, expiry_date_indices_weekly)
             else:
-                file_to_save = os.getcwd() + '/DB/edle.db'
+                file_to_save = os.getcwd() + '/DB/' + config.DB_Name
                 self.objGAPI.download_files(service, file_to_save, file_id, False)
                 conn = self.objDBOP.create_connection()
                 # Create Tables as per Expiry dates

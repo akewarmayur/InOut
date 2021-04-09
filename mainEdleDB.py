@@ -122,7 +122,7 @@ if __name__ == '__main__':
     machine_name = args.machine_name
     config.env = args.env
     # config.env = 'PROD'
-    # machine_name = 'Mayur'
+    # machine_name = 'Index'
     config.machine_name = machine_name
     config.DB_Name = machine_name + '.db'
     service = objMain.objGAPI.intiate_gdAPI()
@@ -132,8 +132,9 @@ if __name__ == '__main__':
 
     FolderIDs = objMain.create_folders(service, EDStocks, EDIndicesM, EDIndicesW)
     status = objMain.objHelpDB.downloadDB(service, EDStocks, EDIndicesM, EDIndicesW)
-    # objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW)
-    # symbol_list = symbol_list[:1]
+    objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW)
+    symbol_list = symbol_list[3:4]
+    print(symbol_list)
 
     # Insert Thresholds from CSV
     dfThreshold = pd.read_csv(os.getcwd() + '/thresholds.csv')
@@ -173,10 +174,10 @@ if __name__ == '__main__':
         print('Check Program for errors')
 
     #Upload DB file at the end of the day
-    file_id = objMain.objGAPI.search_file(service, 'edle.db', 'mime_type', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
+    file_id = objMain.objGAPI.search_file(service, config.DB_Name, 'mime_type', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
     if file_id != 0:
         objMain.objGAPI.delete_file(service, file_id)
-    objMain.objGAPI.upload_file(service, 'edle.db', os.getcwd() + '/DB/edle.db', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
+    objMain.objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name, '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
 
 
 # obj = MainEdle()
