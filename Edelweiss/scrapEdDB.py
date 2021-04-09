@@ -152,7 +152,13 @@ class ScrapData:
                         self.objDB.insert(conn, currentDate, scripName, IndexORStocks, strikePrice, optionType, strcurrentDateTime,
                                           currentDateTime, strExpiryDate, OI, COI, IV, VOL, MOI, 0, table_name)
             print(strcurrentDateTime)
+            query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
+            cur = conn.cursor()
+            cur.execute(query, [scripName])
+            rows = cur.fetchall()
             conn.close()
+            if len(rows) == 0:
+                return False
             return True
         except Exception as e:
             print("In Exception ", e)
