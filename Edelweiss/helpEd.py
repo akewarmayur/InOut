@@ -179,7 +179,7 @@ class HelpEd:
             s = df['StrikePrice'].iloc[x]
             # option_type = df['OptionType'].iloc[0]
             list_to_write = [dt, symbol, expiry_date, option_type, s, old_COI, current_coi]
-            self.objSheet.writeSheet('CIEnotifications', list_to_write, sheet_to_notify)
+            self.objSheet.writeSheet(config.Notesheet, list_to_write, sheet_to_notify)
         except Exception as e:
             print('Exception in outliers Notification Process:', e)
 

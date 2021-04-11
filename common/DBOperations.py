@@ -52,8 +52,7 @@ class DatabaseOp:
                                             IV TEXT NOT NULL,
                                             VOL TEXT NOT NULL,
                                             MinuteOI TEXT NOT NULL,
-                                            Flag INTEGER NOT NULL,
-                                            createdDate DATETIME DEFAULT CURRENT_TIMESTAMP 
+                                            Flag INTEGER NOT NULL 
                                         );'''.format(table_name)
         try:
             c = conn.cursor()

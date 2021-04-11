@@ -116,11 +116,13 @@ if __name__ == '__main__':
     my_parser = argparse.ArgumentParser()
     my_parser.add_argument('--machine_name', action='store', type=str, required=True)
     my_parser.add_argument('--env', action='store', type=str, required=True)
+    my_parser.add_argument('--sesRestart', action='store', type=str, required=True)
     args = my_parser.parse_args()
     objpEd = ProcessEd()
     objMain = MainEdle()
     machine_name = args.machine_name
     config.env = args.env
+    config.sessionRestart = args.sesRestart
     # config.env = 'PROD'
     # machine_name = 'Index'
     config.machine_name = machine_name
@@ -132,7 +134,7 @@ if __name__ == '__main__':
 
     FolderIDs = objMain.create_folders(service, EDStocks, EDIndicesM, EDIndicesW)
     status = objMain.objHelpDB.downloadDB(service, EDStocks, EDIndicesM, EDIndicesW)
-    objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW)
+    objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW, config.sessionRestart)
     #symbol_list = symbol_list[3:4]
     print(symbol_list)
 

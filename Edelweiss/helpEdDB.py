@@ -43,8 +43,8 @@ class HelpEdDB:
             cur.execute(query, [scripName])
             data = cur.fetchall()
 
-            columns = ['ID', 'currentDate', 'scripName', 'IndexORStocks', 'strikePrice', 'optionType', 'strcurrentDateTime',
-                       'currentDateTime', 'ExpiryDate', 'OI', 'COI', 'IV', 'VOL', 'MinuteOI', 'Flag', 'CreatedAT']
+            columns = ['ID', 'ScrapedDate', 'ScripName', 'IndexORStocks', 'StrikePrice', 'OptionType', 'StrTradeDateTime', 'TradeDateTime', 'ExpiryDate', 'OI',
+       'COI', 'IV', 'VOL', 'MinuteOI', 'Flag']
             df = pd.DataFrame(data, columns=columns)
             # df.to_csv(os.getcwd() + '/Edelweiss/csv/' + file_name, index=False)
             return df, True
@@ -98,7 +98,7 @@ class HelpEdDB:
             print('Exception in downloading DB:', e)
             return False
 
-    def downLoadAllCSV(self, service, Ndict, expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly):
+    def downLoadAllCSV(self, service, Ndict, expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly, sessionRestart):
         try:
             for key, value in Ndict.items():
                 if value == 'FALSE':
@@ -109,14 +109,21 @@ class HelpEdDB:
                         file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
                         if file_id != 0:
                             self.objGAPI.download_files(service, file_saved_as, file_id, False)
+                            if sessionRestart == 'yes':
+                                table_name = config.TableName + '_' + f
+                                self.CSV2SQL(file_saved_as, table_name)
 
                     for f in expiry_date_indices_weekly:
                         f = f.replace(' ', '_')
                         name_of_file = str(key) + "_" + str(f) + ".csv"
                         file_saved_as = os.getcwd() + "/Edelweiss/d_csv/" + str(key) + "_" + str(f) + ".csv"
+
                         file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
                         if file_id != 0:
                             self.objGAPI.download_files(service, file_saved_as, file_id, False)
+                            if sessionRestart == 'yes':
+                                table_name = config.TableName + '_' + f
+                                self.CSV2SQL(file_saved_as, table_name)
                 else:
                     for f in expiry_date_stocks:
                         f = f.replace(' ', '_')
@@ -125,8 +132,23 @@ class HelpEdDB:
                         file_id = self.objGAPI.search_file(service, name_of_file, "text/csv", '1GLA0S461C1yAc47jMXdwxBdoAWX9onbA')
                         if file_id != 0:
                             self.objGAPI.download_files(service, file_saved_as, file_id, False)
+                            if sessionRestart == 'yes':
+                                table_name = config.TableName + '_' + f
+                                self.CSV2SQL(file_saved_as, table_name)
+
         except Exception as e:
             print('Exception in Downloading all CSVs:', e)
+
+
+    def CSV2SQL(self, file_saved_as, table_name):
+        try:
+            df = pd.read_csv(file_saved_as, index_col=0)
+            conn = self.objDB.create_connection()
+            df.to_sql(table_name, conn, if_exists='append', index=False)
+            conn.close()
+        except Exception as e:
+            print('Exception in converting CSV to SQL:', e)
+
 
 
 

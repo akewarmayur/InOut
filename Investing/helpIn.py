@@ -3,6 +3,7 @@ from common.sheetOperations import SheetOps
 from common.common import CommonFunctions
 import Investing.investConfig as investConfig
 import warnings
+import config
 warnings.filterwarnings("ignore")
 
 
@@ -42,7 +43,7 @@ class HelpIn:
             if position == -1 and len(l) != 0:
                 for i in l:
                     wl[i] = ' '
-            self.objSheet.writeSheet('CIEnotifications', wl, 'InvestingNotify')
+            self.objSheet.writeSheet(config.Notesheet, wl, 'InvestingNotify')
 
     def calculations(self, df, candles_to_notify_from):
         outliers_close_rows = []
