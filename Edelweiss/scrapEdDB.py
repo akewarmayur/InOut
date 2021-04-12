@@ -198,6 +198,19 @@ class ScrapData:
             return [], [], []
 
 
+    def cal_timeDiff(self, strcurrentDateTime, pvTime):
+        strcurrentDateTime_list = strcurrentDateTime.split(':')
+        pvTime_list = pvTime.split(':')
+
+        if strcurrentDateTime_list[0] == pvTime_list[0]:
+            timeDiff = abs(float(strcurrentDateTime_list[1]) - float(pvTime_list[1]))
+            # print(timeDiff)
+        else:
+            timeDiff = abs(float(strcurrentDateTime_list[0]) - float(pvTime_list[0]))
+            # print(timeDiff)
+        return timeDiff
+
+
     def start_scraping(self, scripName, expDate, threshold):
         exd = expDate.replace(' ', '_')
         table_name = config.TableName + exd
@@ -251,11 +264,10 @@ class ScrapData:
                             prevOI = ''
                             Flag = 0
                         else:
-                            timeDiff = float(strcurrentDateTime.replace(':', '.')) - float(pvTime.replace(':', '.'))
+                            timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
                             if timeDiff == 0.0:
                                 timeDiff = 1.0
-                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND StrTradeDateTime=?'.format(
-                                table_name)
+                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND StrTradeDateTime=?'.format(table_name)
                             cur.execute(que, [scripName, strikePrice, optionType, pvTime])
                             rows = cur.fetchall()
                             if len(rows) != 0:
@@ -309,7 +321,7 @@ class ScrapData:
                             prevOI = ''
                             Flag = 0
                         else:
-                            timeDiff = float(strcurrentDateTime.replace(':', '.')) - float(pvTime.replace(':', '.'))
+                            timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
                             if timeDiff == 0.0:
                                 timeDiff = 1.0
                             que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND StrTradeDateTime=?'.format(table_name)
