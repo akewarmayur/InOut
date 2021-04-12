@@ -145,6 +145,8 @@ class ProcessEd(threading.Thread):
                             ns.iterations += 1
                         if ns.iterations == 31:
                             ns.iterations = 0
+                        #Sleep for a minute before next scrapping
+                        time.sleep(59)
 
                 else:
                     it = 0

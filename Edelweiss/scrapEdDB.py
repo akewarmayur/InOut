@@ -217,7 +217,6 @@ class ScrapData:
         conn = self.objDB.create_connection()
 
         currentDate = str(datetime.datetime.now(timezone('Asia/Calcutta'))).split(' ')[0]
-        currentDateTime = datetime.datetime.now(timezone('Asia/Calcutta'))
 
         if scripName == 'FINNIFTY' or scripName == 'BANKNIFTY' or scripName == 'NIFTY':
             data = '{ ' + "'exp':'{0}','aTyp':'OPTIDX','uSym':'{1}'".format(expDate, scripName) + '}'
@@ -232,6 +231,20 @@ class ScrapData:
             jsons = r.json()['opChn']
             runCtr = runCtr + 1
             ctr = 0
+
+            currentDateTime = datetime.datetime.now(timezone('Asia/Calcutta'))
+            strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+
+            query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
+            cur = conn.cursor()
+            cur.execute(query, [scripName])
+            rows = cur.fetchall()
+            if len(rows) != 0:
+                pvTime = rows[0][0]
+                # print(pvTime)
+            else:
+                pvTime = ''
+
             for j in jsons:
                 ctr = ctr + 1
                 if (j['ceQt']['trdSym'][-2:] == 'CE'):
@@ -239,7 +252,7 @@ class ScrapData:
                     optionType = tradeSymbol[-2:]
                     strExpiryDate = tradeSymbol[len(scripName):(len(scripName) + 7)]
                     #ExpiryDate = datetime.datetime.strptime(strExpiryDate, '%d%b%y')
-                    strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+
                     strikePrice = float(tradeSymbol[len(scripName) + 7:-2])
                     OI = j['ceQt']['opInt']
                     OI = float(OI)
@@ -249,16 +262,6 @@ class ScrapData:
                     COI = float(COI)
 
                     if COI != 0.0:
-                        query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
-                        cur = conn.cursor()
-                        cur.execute(query, [scripName, strikePrice, optionType])
-                        rows = cur.fetchall()
-                        if len(rows) != 0:
-                            pvTime = rows[0][0]
-                            # print(pvTime)
-                        else:
-                            pvTime = ''
-
                         if pvTime == '':
                             MOI = 0
                             prevOI = ''
@@ -275,15 +278,19 @@ class ScrapData:
                                 MOI = (OI - float(prevOI)) / timeDiff
                             else:
                                 prevOI = ''
-                                MOI = 0
+                                MOI = 'XX'
                             # Notification
                             # threshold = 0.0
 
-                            if abs(float(MOI)) >= float(threshold):
-                                self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate,
-                                                   optionType, str(prevOI), str(OI))
+                            if MOI != 'XX':
+                                if abs(float(MOI)) >= float(threshold):
+                                    self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate,
+                                                       optionType, str(prevOI), str(OI))
 
-                                Flag = 1
+                                    Flag = 1
+                                    print(f'{scripName}** {optionType} ** {Flag}')
+                                else:
+                                    Flag = 0
                             else:
                                 Flag = 0
 
@@ -296,7 +303,7 @@ class ScrapData:
                     optionType = tradeSymbol[-2:]
                     strExpiryDate = tradeSymbol[len(scripName):(len(scripName) + 7)]
                     #ExpiryDate = datetime.datetime.strptime(strExpiryDate, '%d%b%y')
-                    strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                    # strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                     strikePrice = float(tradeSymbol[len(scripName) + 7:-2])
                     OI = j['peQt']['opInt']
                     OI = float(OI)
@@ -306,16 +313,6 @@ class ScrapData:
                     COI = float(COI)
 
                     if COI != 0.0:
-                        query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
-                        cur = conn.cursor()
-                        cur.execute(query, [scripName, strikePrice, optionType])
-                        rows = cur.fetchall()
-                        if len(rows) != 0:
-                            pvTime = rows[0][0]
-                            # print(pvTime)
-                        else:
-                            pvTime = ''
-
                         if pvTime == '':
                             MOI = 0
                             prevOI = ''
@@ -332,13 +329,18 @@ class ScrapData:
                                 MOI = (OI - float(prevOI)) / timeDiff
                             else:
                                 prevOI = ''
-                                MOI = 0
+                                MOI = 'XX'
                             # Notification
                             # threshold = 0.0
-                            if abs(float(MOI)) >= float(threshold):
-                                self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate,
-                                                   optionType, str(prevOI), str(OI))
-                                Flag = 1
+                            if MOI != 'XX':
+                                if abs(float(MOI)) >= float(threshold):
+                                    self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate,
+                                                       optionType, str(prevOI), str(OI))
+
+                                    Flag = 1
+                                    print(f'{scripName}** {optionType} ** {Flag}')
+                                else:
+                                    Flag = 0
                             else:
                                 Flag = 0
 
