@@ -27,9 +27,9 @@ class ScrapData:
 
     def notifications(self, dt, strikePrice, symbol, expiry_date, option_type, old_OI, current_OI):
         if config.env == 'QA':
-            sheet_to_notify = 'EdelNotifyQA'
+            sheet_to_notify = 'StockNotify'
         else:
-            sheet_to_notify = 'EdelweissNotify'
+            sheet_to_notify = 'IndexNotify'
         try:
             list_to_write = [dt, symbol, expiry_date, option_type, strikePrice, old_OI, current_OI]
             self.objSheet.writeSheet(config.Notesheet, list_to_write, sheet_to_notify)
