@@ -235,9 +235,9 @@ class ScrapData:
             currentDateTime = datetime.datetime.now(timezone('Asia/Calcutta'))
             strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
 
-            query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
+            query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND ScrapedDate=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
             cur = conn.cursor()
-            cur.execute(query, [scripName])
+            cur.execute(query, [scripName, currentDate])
             rows = cur.fetchall()
             if len(rows) != 0:
                 pvTime = rows[0][0]

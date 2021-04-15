@@ -137,8 +137,8 @@ class ProcessEd(threading.Thread):
                     if len(rr) != 0:
                         threshold = rr[0]
                     else:
-                        threshold = 0
-                        print('No threshold existed for given expiry date')
+                        threshold = 1.0
+                        #print('No threshold existed for given expiry date')
                     conn.close()
 
                     while True:
