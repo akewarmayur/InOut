@@ -123,19 +123,25 @@ if __name__ == '__main__':
     machine_name = args.machine_name
     config.env = args.env
     config.sessionRestart = args.sesRestart
-    # config.env = 'PROD'
+    # config.env = 'QA'
     # machine_name = 'Index'
+    # config.sessionRestart = 'no'
     config.machine_name = machine_name
     config.DB_Name = machine_name + '.db'
     service = objMain.objGAPI.intiate_gdAPI()
     q = Queue(maxsize=0)
     # Use many threads (50 max, or one for each url)
     isMarketON, symbol_list, diction, EDStocks, EDIndicesM, EDIndicesW, Ndiction = objMain.get_symbol_list(machine_name)
+    # print(symbol_list)
+    # print(diction)
 
     FolderIDs = objMain.create_folders(service, EDStocks, EDIndicesM, EDIndicesW)
     status = objMain.objHelpDB.downloadDB(service, EDStocks, EDIndicesM, EDIndicesW)
     objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW, config.sessionRestart)
-    #symbol_list = symbol_list[3:4]
+    # status = True
+    #symbol_list = symbol_list[:1]
+    symbol_list.append('UPLOAD_THREAD')
+    # b['UPLOAD_THREAD'] = 'UPLOAD_DB'
     print(symbol_list)
 
     # Insert Thresholds from CSV

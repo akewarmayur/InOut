@@ -111,46 +111,94 @@ class ProcessEd(threading.Thread):
     def start(self, q, result, isMarketON, FolderIDs, diction):
         while not q.empty():
             work = q.get()
-            try:
-                if isMarketON == 'TRUE':
-                    ns = threading.local()
-                    ns.iterations = 0
+            if work[1] == 'UPLOAD_THREAD':
+                while True:
+                    strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                    strcurrentTime = strcurrentTime.replace(':', '.')
+                    if float(strcurrentTime) > float(15.30):
+                        print('Market is not ON. Try tomorrow or change isMarketON flag')
+                        break
+                    time.sleep(1800)
+                    objGAPI = GoogleAPI()
+                    service = objGAPI.intiate_gdAPI()
+                    file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
+                    if file_id != 0:
+                        objGAPI.delete_file(service, file_id)
+                        objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
+                                                '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
 
-                    #Get threshold
-                    ScrapedFor = work[1]
-                    if diction[ScrapedFor] == 'FALSE':
-                        ScrapedFor = ScrapedFor.split('_')
-                        expDate = ScrapedFor[1]
-                        symbol = ScrapedFor[2]
-                    else:
-                        ScrapedFor = ScrapedFor.split('_')
-                        expDate = ScrapedFor[0]
-                        symbol = ScrapedFor[1]
-                    objDB = DatabaseOp()
-                    conn = objDB.create_connection()
-                    que = 'SELECT Threshold FROM Threshold WHERE ScripName=? AND ExpiryDate=?'
-                    cur = conn.cursor()
-                    ed = expDate.replace(' ', '-')
-                    ed = ed.replace('20', '')
-                    cur.execute(que, [symbol, str(ed)])
-                    rr = cur.fetchone()
-                    if len(rr) != 0:
-                        threshold = rr[0]
-                    else:
-                        threshold = 1.0
-                        #print('No threshold existed for given expiry date')
-                    conn.close()
+            else:
+                try:
+                    if isMarketON == 'TRUE':
+                        ns = threading.local()
+                        ns.iterations = 0
 
-                    while True:
-                        print('******************* Iterations : ', ns.iterations)
+                        #Get threshold
+                        ScrapedFor = work[1]
+                        if diction[ScrapedFor] == 'FALSE':
+                            ScrapedFor = ScrapedFor.split('_')
+                            expDate = ScrapedFor[1]
+                            symbol = ScrapedFor[2]
+                        else:
+                            ScrapedFor = ScrapedFor.split('_')
+                            expDate = ScrapedFor[0]
+                            symbol = ScrapedFor[1]
+                        objDB = DatabaseOp()
+                        conn = objDB.create_connection()
+                        que = 'SELECT Threshold FROM Threshold WHERE ScripName=? AND ExpiryDate=?'
+                        cur = conn.cursor()
+                        ed = expDate.replace(' ', '-')
+                        ed = ed.replace('20', '')
+                        cur.execute(que, [symbol, str(ed)])
+                        rr = cur.fetchone()
+                        if len(rr) != 0:
+                            threshold = rr[0]
+                        else:
+                            threshold = 1.0
+                            #print('No threshold existed for given expiry date')
+                        conn.close()
+
+                        while True:
+                            print('******************* Iterations : ', ns.iterations)
+                            strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                            strcurrentTime = strcurrentTime.replace(':', '.')
+                            if float(strcurrentTime) > float(15.30):
+                                print('Market is not ON. Try tomorrow or change isMarketON flag')
+                                exd = expDate.replace(' ', '_')
+                                table_name = config.TableName + exd
+                                folder_ID = FolderIDs[expDate]
+                                self.endupload(symbol, expDate, table_name, folder_ID, threshold)
+                                break
+                            ScrapedFor = work[1]
+                            if diction[ScrapedFor] == 'FALSE':
+                                ScrapedFor = ScrapedFor.split('_')
+                                expDate = ScrapedFor[1]
+                                symbol = ScrapedFor[2]
+                                folder_ID = FolderIDs[expDate]
+                                exd = expDate.replace(' ', '_')
+                                table_name = config.TableName + exd
+                                status = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold)
+                            else:
+                                ScrapedFor = ScrapedFor.split('_')
+                                expDate = ScrapedFor[0]
+                                symbol = ScrapedFor[1]
+                                folder_ID = FolderIDs[expDate]
+                                exd = expDate.replace(' ', '_')
+                                table_name = config.TableName + exd
+                                status = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold)
+                            if status == True:
+                                ns.iterations += 1
+                            if ns.iterations == 31:
+                                ns.iterations = 0
+                            #Sleep for a minute before next scrapping
+                            time.sleep(59)
+
+                    else:
+                        it = 0
                         strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                         strcurrentTime = strcurrentTime.replace(':', '.')
                         if float(strcurrentTime) > float(15.30):
                             print('Market is not ON. Try tomorrow or change isMarketON flag')
-                            exd = expDate.replace(' ', '_')
-                            table_name = config.TableName + exd
-                            folder_ID = FolderIDs[expDate]
-                            self.endupload(symbol, expDate, table_name, folder_ID, threshold)
                             break
                         ScrapedFor = work[1]
                         if diction[ScrapedFor] == 'FALSE':
@@ -160,7 +208,7 @@ class ProcessEd(threading.Thread):
                             folder_ID = FolderIDs[expDate]
                             exd = expDate.replace(' ', '_')
                             table_name = config.TableName + exd
-                            status = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold)
+                            status = self.process(symbol, table_name, expDate, it, folder_ID, threshold)
                         else:
                             ScrapedFor = ScrapedFor.split('_')
                             expDate = ScrapedFor[0]
@@ -168,42 +216,11 @@ class ProcessEd(threading.Thread):
                             folder_ID = FolderIDs[expDate]
                             exd = expDate.replace(' ', '_')
                             table_name = config.TableName + exd
-                            status = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold)
-                        if status == True:
-                            ns.iterations += 1
-                        if ns.iterations == 31:
-                            ns.iterations = 0
-                        #Sleep for a minute before next scrapping
-                        time.sleep(59)
+                            status = self.process(symbol, table_name, expDate, it, folder_ID, threshold)
 
-                else:
-                    it = 0
-                    strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
-                    strcurrentTime = strcurrentTime.replace(':', '.')
-                    if float(strcurrentTime) > float(15.30):
-                        print('Market is not ON. Try tomorrow or change isMarketON flag')
-                        break
-                    ScrapedFor = work[1]
-                    if diction[ScrapedFor] == 'FALSE':
-                        ScrapedFor = ScrapedFor.split('_')
-                        expDate = ScrapedFor[1]
-                        symbol = ScrapedFor[2]
-                        folder_ID = FolderIDs[expDate]
-                        exd = expDate.replace(' ', '_')
-                        table_name = config.TableName + exd
-                        status = self.process(symbol, table_name, expDate, it, folder_ID, threshold)
-                    else:
-                        ScrapedFor = ScrapedFor.split('_')
-                        expDate = ScrapedFor[0]
-                        symbol = ScrapedFor[1]
-                        folder_ID = FolderIDs[expDate]
-                        exd = expDate.replace(' ', '_')
-                        table_name = config.TableName + exd
-                        status = self.process(symbol, table_name, expDate, it, folder_ID, threshold)
-
-            except:
-                result[work[0]] = {}
-            # signal to the queue that task has been processed
+                except:
+                    result[work[0]] = {}
+                # signal to the queue that task has been processed
             q.task_done()
         return True
 
