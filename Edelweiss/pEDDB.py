@@ -49,6 +49,30 @@ class ProcessEd(threading.Thread):
             print('Exception while saving files on drive', e)
             return False
 
+    def endupload(self, symbol, expiry_date, table_name, folder_id, threshold):
+        objScrap = ScrapData()
+        exd = expiry_date.replace(' ', '_')
+        file_name = symbol + '_' + exd + '.csv'
+        status = objScrap.start_scraping(str(symbol), expiry_date, threshold)
+        objHDB = HelpEdDB()
+        objGAPI = GoogleAPI()
+        objCommon = CommonFunctions()
+        if status == True:
+            current_df, st = objHDB.DB2CSV(symbol, table_name)
+            if os.path.exists(os.getcwd() + '/Edelweiss/d_csv/' + file_name):
+                previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + file_name, index_col=0)
+                result_df = self.concate(current_df, previous_df)
+            else:
+                result_df = current_df
+
+            destination = os.getcwd() + '/Edelweiss/sample_data/' + file_name
+
+            result_df.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + file_name, index=False)
+            service = objGAPI.intiate_gdAPI()
+            isDataAvailable, file_id = objCommon.check_pdata_exist(file_name, folder_id)
+            if isDataAvailable == True:
+                objGAPI.delete_file(service, file_id)
+            objGAPI.upload_file(service, str(file_name), destination, folder_id, 'text/csv')
 
     def process(self, symbol, table_name, expiry_date, iterations, folder_id, threshold):
         objGAPI = GoogleAPI()
@@ -123,6 +147,10 @@ class ProcessEd(threading.Thread):
                         strcurrentTime = strcurrentTime.replace(':', '.')
                         if float(strcurrentTime) > float(15.30):
                             print('Market is not ON. Try tomorrow or change isMarketON flag')
+                            exd = expDate.replace(' ', '_')
+                            table_name = config.TableName + exd
+                            folder_ID = FolderIDs[expDate]
+                            self.endupload(symbol, expDate, table_name, folder_ID, threshold)
                             break
                         ScrapedFor = work[1]
                         if diction[ScrapedFor] == 'FALSE':
