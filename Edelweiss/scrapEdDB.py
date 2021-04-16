@@ -190,7 +190,7 @@ class ScrapData:
             expiry_date_indices = list(map(change_format, expiry_date_indices))
 
             expiry_date_indices_monthly = expiry_date_stocks
-            expiry_date_indices_weekly = ['2021-04-22', '2021-05-06']
+            expiry_date_indices_weekly = ['22 Apr 2021', '6 May 2021']
 
             return expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly
         except Exception as e:
