@@ -49,48 +49,39 @@ class ProcessEd(threading.Thread):
             print('Exception while saving files on drive', e)
             return False
 
-    def endupload(self, symbol, expiry_date, table_name, folder_id, threshold):
-        objScrap = ScrapData()
+    def endupload(self, symbol, expiry_date, table_name, folder_id):
         exd = expiry_date.replace(' ', '_')
         file_name = symbol + '_' + exd + '.csv'
-        status = objScrap.start_scraping(str(symbol), expiry_date, threshold)
         objHDB = HelpEdDB()
         objGAPI = GoogleAPI()
         objCommon = CommonFunctions()
-        if status == True:
-            current_df, st = objHDB.DB2CSV(symbol, table_name)
-            if os.path.exists(os.getcwd() + '/Edelweiss/d_csv/' + file_name):
-                previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + file_name, index_col=0)
-                result_df = self.concate(current_df, previous_df)
-            else:
-                result_df = current_df
+        result_df, st = objHDB.DB2CSV(symbol, table_name)
+        destination = os.getcwd() + '/Edelweiss/sample_data/' + file_name
 
-            destination = os.getcwd() + '/Edelweiss/sample_data/' + file_name
+        result_df.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + file_name, index=False)
+        service = objGAPI.intiate_gdAPI()
+        isDataAvailable, file_id = objCommon.check_pdata_exist(file_name, folder_id)
+        if isDataAvailable == True:
+            objGAPI.delete_file(service, file_id)
+        objGAPI.upload_file(service, str(file_name), destination, folder_id, 'text/csv')
 
-            result_df.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + file_name, index=False)
-            service = objGAPI.intiate_gdAPI()
-            isDataAvailable, file_id = objCommon.check_pdata_exist(file_name, folder_id)
-            if isDataAvailable == True:
-                objGAPI.delete_file(service, file_id)
-            objGAPI.upload_file(service, str(file_name), destination, folder_id, 'text/csv')
-
-    def process(self, symbol, table_name, expiry_date, iterations, folder_id, threshold):
+    def process(self, symbol, table_name, expiry_date, iterations, folder_id, threshold, pVtime):
         objGAPI = GoogleAPI()
         objScrap = ScrapData()
         objCommon = CommonFunctions()
         try:
             exd = expiry_date.replace(' ', '_')
             file_name = symbol + '_' + exd + '.csv'
-            status = objScrap.start_scraping(str(symbol), expiry_date, threshold)
+            status, pVtime = objScrap.start_scraping(str(symbol), expiry_date, threshold, pVtime)
             if iterations == 30:
                 objHDB = HelpEdDB()
                 if status == True:
-                    current_df, st = objHDB.DB2CSV(symbol, table_name)
-                    if os.path.exists(os.getcwd() + '/Edelweiss/d_csv/' + file_name):
-                        previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + file_name, index_col=0)
-                        result_df = self.concate(current_df, previous_df)
-                    else:
-                        result_df = current_df
+                    result_df, st = objHDB.DB2CSV(symbol, table_name)
+                    # if os.path.exists(os.getcwd() + '/Edelweiss/d_csv/' + file_name):
+                    #     previous_df = pd.read_csv(os.getcwd() + '/Edelweiss/d_csv/' + file_name, index_col=0)
+                    #     result_df = self.concate(current_df, previous_df)
+                    # else:
+                    #     result_df = current_df
 
                     destination = os.getcwd() + '/Edelweiss/sample_data/' + file_name
 
@@ -102,8 +93,8 @@ class ProcessEd(threading.Thread):
                     objGAPI.upload_file(service, str(file_name), destination, folder_id, 'text/csv')
                 else:
                     print(f"Scrapping df empty for : {symbol}")
-                    return False
-            return True
+                    return False, pVtime
+            return True, pVtime
         except Exception as e:
             print('Exception in Edle Scrapping Process:', e)
             return False
@@ -112,13 +103,20 @@ class ProcessEd(threading.Thread):
         while not q.empty():
             work = q.get()
             if work[1] == 'UPLOAD_THREAD':
+                print('In upload thread')
                 while True:
                     strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                     strcurrentTime = strcurrentTime.replace(':', '.')
                     if float(strcurrentTime) > float(15.30):
                         print('Market is not ON. Try tomorrow or change isMarketON flag')
                         break
-                    time.sleep(1800)
+                    for a in range(1800):
+                        sT = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                        sT = sT.replace(':', '.')
+                        if float(sT) > float(15.30):
+                            print('Market is not ON. Try tomorrow or change isMarketON flag')
+                            break
+                        time.sleep(1)
                     objGAPI = GoogleAPI()
                     service = objGAPI.intiate_gdAPI()
                     file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
@@ -157,7 +155,7 @@ class ProcessEd(threading.Thread):
                             threshold = 1.0
                             #print('No threshold existed for given expiry date')
                         conn.close()
-
+                        pVtime = ''
                         while True:
                             print('******************* Iterations : ', ns.iterations)
                             strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
@@ -167,7 +165,7 @@ class ProcessEd(threading.Thread):
                                 exd = expDate.replace(' ', '_')
                                 table_name = config.TableName + exd
                                 folder_ID = FolderIDs[expDate]
-                                self.endupload(symbol, expDate, table_name, folder_ID, threshold)
+                                self.endupload(symbol, expDate, table_name, folder_ID)
                                 break
                             ScrapedFor = work[1]
                             if diction[ScrapedFor] == 'FALSE':
@@ -177,7 +175,7 @@ class ProcessEd(threading.Thread):
                                 folder_ID = FolderIDs[expDate]
                                 exd = expDate.replace(' ', '_')
                                 table_name = config.TableName + exd
-                                status = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold)
+                                status, pVtime = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold, pVtime)
                             else:
                                 ScrapedFor = ScrapedFor.split('_')
                                 expDate = ScrapedFor[0]
@@ -185,7 +183,7 @@ class ProcessEd(threading.Thread):
                                 folder_ID = FolderIDs[expDate]
                                 exd = expDate.replace(' ', '_')
                                 table_name = config.TableName + exd
-                                status = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold)
+                                status, pVtime = self.process(symbol, table_name, expDate, ns.iterations, folder_ID, threshold, pVtime)
                             if status == True:
                                 ns.iterations += 1
                             if ns.iterations == 31:
@@ -195,6 +193,7 @@ class ProcessEd(threading.Thread):
 
                     else:
                         it = 0
+                        pVtime = ''
                         strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                         strcurrentTime = strcurrentTime.replace(':', '.')
                         if float(strcurrentTime) > float(15.30):
@@ -208,7 +207,7 @@ class ProcessEd(threading.Thread):
                             folder_ID = FolderIDs[expDate]
                             exd = expDate.replace(' ', '_')
                             table_name = config.TableName + exd
-                            status = self.process(symbol, table_name, expDate, it, folder_ID, threshold)
+                            status, pVtime = self.process(symbol, table_name, expDate, it, folder_ID, threshold, pVtime)
                         else:
                             ScrapedFor = ScrapedFor.split('_')
                             expDate = ScrapedFor[0]
@@ -216,7 +215,7 @@ class ProcessEd(threading.Thread):
                             folder_ID = FolderIDs[expDate]
                             exd = expDate.replace(' ', '_')
                             table_name = config.TableName + exd
-                            status = self.process(symbol, table_name, expDate, it, folder_ID, threshold)
+                            status, pVtime = self.process(symbol, table_name, expDate, it, folder_ID, threshold, pVtime)
 
                 except:
                     result[work[0]] = {}

@@ -47,6 +47,7 @@ class HelpEdDB:
        'COI', 'IV', 'VOL', 'MinuteOI', 'Flag']
             df = pd.DataFrame(data, columns=columns)
             # df.to_csv(os.getcwd() + '/Edelweiss/csv/' + file_name, index=False)
+            df = df.sort_values(["ScrapedDate", "StrTradeDateTime"], ascending=(False, False))
             return df, True
             # print(df.head())
         except Exception as e:

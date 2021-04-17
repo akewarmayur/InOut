@@ -235,15 +235,16 @@ class ScrapData:
             currentDateTime = datetime.datetime.now(timezone('Asia/Calcutta'))
             strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
 
-            query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND ScrapedDate=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
-            cur = conn.cursor()
-            cur.execute(query, [scripName, currentDate])
-            rows = cur.fetchall()
-            if len(rows) != 0:
-                pvTime = rows[0][0]
-                # print(pvTime)
-            else:
-                pvTime = ''
+            if pvTime == '':
+                query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND ScrapedDate=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
+                cur = conn.cursor()
+                cur.execute(query, [scripName, currentDate])
+                rows = cur.fetchall()
+                if len(rows) != 0:
+                    pvTime = rows[0][0]
+                    # print(pvTime)
+                else:
+                    pvTime = ''
 
             for j in jsons:
                 ctr = ctr + 1
@@ -270,8 +271,8 @@ class ScrapData:
                             timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
                             if timeDiff == 0.0:
                                 timeDiff = 1.0
-                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND StrTradeDateTime=?'.format(table_name)
-                            cur.execute(que, [scripName, strikePrice, optionType, pvTime])
+                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND ScrapedDate=? AND StrTradeDateTime=?'.format(table_name)
+                            cur.execute(que, [scripName, strikePrice, optionType, currentDate, pvTime])
                             rows = cur.fetchall()
                             if len(rows) != 0:
                                 prevOI = rows[0][0]
@@ -321,8 +322,8 @@ class ScrapData:
                             timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
                             if timeDiff == 0.0:
                                 timeDiff = 1.0
-                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND StrTradeDateTime=?'.format(table_name)
-                            cur.execute(que, [scripName, strikePrice, optionType, pvTime])
+                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND ScrapedDate=? AND StrTradeDateTime=?'.format(table_name)
+                            cur.execute(que, [scripName, strikePrice, optionType, currentDate, pvTime])
                             rows = cur.fetchall()
                             if len(rows) != 0:
                                 prevOI = rows[0][0]
@@ -356,12 +357,12 @@ class ScrapData:
             # print('********', rows)
             conn.close()
             if len(rows) == 0:
-                return False
-            return True
+                return False, strcurrentDateTime
+            return True, strcurrentDateTime
         except Exception as e:
             print("In Exception ", e)
             conn.close()
-            return False
+            return False, strcurrentDateTime
 
 
 # obj = ScrapData()
