@@ -27,6 +27,7 @@ class ProcessEd(threading.Thread):
             final = df_now.append(previous_df)
             #final.reset_index(inplace=True)
         except Exception as e:
+            final = previous_df
             print('concat exception: ', e)
 
         return final
@@ -50,20 +51,24 @@ class ProcessEd(threading.Thread):
             return False
 
     def endupload(self, symbol, expiry_date, table_name, folder_id):
-        exd = expiry_date.replace(' ', '_')
-        file_name = symbol + '_' + exd + '.csv'
-        objHDB = HelpEdDB()
-        objGAPI = GoogleAPI()
-        objCommon = CommonFunctions()
-        result_df, st = objHDB.DB2CSV(symbol, table_name)
-        destination = os.getcwd() + '/Edelweiss/sample_data/' + file_name
+        try:
+            exd = expiry_date.replace(' ', '_')
+            file_name = symbol + '_' + exd + '.csv'
+            objHDB = HelpEdDB()
+            objGAPI = GoogleAPI()
+            objCommon = CommonFunctions()
+            result_df, st = objHDB.DB2CSV(symbol, table_name)
+            destination = os.getcwd() + '/Edelweiss/sample_data/' + file_name
 
-        result_df.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + file_name, index=False)
-        service = objGAPI.intiate_gdAPI()
-        isDataAvailable, file_id = objCommon.check_pdata_exist(file_name, folder_id)
-        if isDataAvailable == True:
-            objGAPI.delete_file(service, file_id)
-        objGAPI.upload_file(service, str(file_name), destination, folder_id, 'text/csv')
+            result_df.to_csv(os.getcwd() + '/Edelweiss/sample_data/' + file_name, index=False)
+            service = objGAPI.intiate_gdAPI()
+            isDataAvailable, file_id = objCommon.check_pdata_exist(file_name, folder_id)
+            if isDataAvailable == True:
+                objGAPI.delete_file(service, file_id)
+            objGAPI.upload_file(service, str(file_name), destination, folder_id, 'text/csv')
+        except Exception as e:
+            print('Exception while saving files on drive at the end of day', e)
+            return False
 
     def process(self, symbol, table_name, expiry_date, iterations, folder_id, threshold, pVtime):
         objGAPI = GoogleAPI()
@@ -97,7 +102,7 @@ class ProcessEd(threading.Thread):
             return True, pVtime
         except Exception as e:
             print('Exception in Edle Scrapping Process:', e)
-            return False
+            return False, pVtime
 
     def start(self, q, result, isMarketON, FolderIDs, diction):
         while not q.empty():

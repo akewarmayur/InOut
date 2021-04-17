@@ -211,22 +211,20 @@ class ScrapData:
         return timeDiff
 
 
-    def start_scraping(self, scripName, expDate, threshold):
+    def start_scraping(self, scripName, expDate, threshold, pvTime):
         exd = expDate.replace(' ', '_')
         table_name = config.TableName + exd
-        conn = self.objDB.create_connection()
-
-        currentDate = str(datetime.datetime.now(timezone('Asia/Calcutta'))).split(' ')[0]
-
-        if scripName == 'FINNIFTY' or scripName == 'BANKNIFTY' or scripName == 'NIFTY':
-            data = '{ ' + "'exp':'{0}','aTyp':'OPTIDX','uSym':'{1}'".format(expDate, scripName) + '}'
-            IndexORStocks = 1
-        else:
-            data = '{ ' + "'exp':'{0}','aTyp':'OPTSTK','uSym':'{1}'".format(expDate, scripName) + '}'
-            IndexORStocks = 0
-        # print(data)
-        runCtr = 0
         try:
+            currentDate = str(datetime.datetime.now(timezone('Asia/Calcutta'))).split(' ')[0]
+
+            if scripName == 'FINNIFTY' or scripName == 'BANKNIFTY' or scripName == 'NIFTY':
+                data = '{ ' + "'exp':'{0}','aTyp':'OPTIDX','uSym':'{1}'".format(expDate, scripName) + '}'
+                IndexORStocks = 1
+            else:
+                data = '{ ' + "'exp':'{0}','aTyp':'OPTSTK','uSym':'{1}'".format(expDate, scripName) + '}'
+                IndexORStocks = 0
+            runCtr = 0
+
             r = requests.post(url=self.url, timeout=20, headers=self.headers, data=data)
             jsons = r.json()['opChn']
             runCtr = runCtr + 1
@@ -236,6 +234,7 @@ class ScrapData:
             strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
 
             if pvTime == '':
+                conn = self.objDB.create_connection()
                 query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND ScrapedDate=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
                 cur = conn.cursor()
                 cur.execute(query, [scripName, currentDate])
@@ -245,6 +244,9 @@ class ScrapData:
                     # print(pvTime)
                 else:
                     pvTime = ''
+            else:
+                conn = self.objDB.create_connection()
+                cur = conn.cursor()
 
             for j in jsons:
                 ctr = ctr + 1
@@ -360,6 +362,7 @@ class ScrapData:
                 return False, strcurrentDateTime
             return True, strcurrentDateTime
         except Exception as e:
+            strcurrentDateTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
             print("In Exception ", e)
             conn.close()
             return False, strcurrentDateTime
