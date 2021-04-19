@@ -352,9 +352,9 @@ class ScrapData:
                                           currentDateTime, strExpiryDate, OI, COI, IV, VOL, MOI, Flag, table_name)
 
             print(strcurrentDateTime)
-            query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
+            query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND ScrapedDate=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
             cur = conn.cursor()
-            cur.execute(query, [scripName])
+            cur.execute(query, [scripName, currentDate])
             rows = cur.fetchall()
             # print('********', rows)
             conn.close()
