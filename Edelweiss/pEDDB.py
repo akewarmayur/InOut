@@ -127,7 +127,7 @@ class ProcessEd(threading.Thread):
                     file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
                     if file_id != 0:
                         objGAPI.delete_file(service, file_id)
-                        objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
+                    objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
                                                 '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
 
             else:
