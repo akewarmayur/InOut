@@ -25,13 +25,13 @@ class ScrapData:
         self.objSheet = SheetOps()
 
 
-    def notifications(self, dt, strikePrice, symbol, expiry_date, option_type, old_OI, current_OI):
+    def notifications(self, currentDate, dt, strikePrice, symbol, expiry_date, option_type, old_OI, current_OI):
         if config.env == 'QA':
             sheet_to_notify = 'StockNotify'
         else:
             sheet_to_notify = 'IndexNotify'
         try:
-            list_to_write = [dt, symbol, expiry_date, option_type, strikePrice, old_OI, current_OI]
+            list_to_write = [currentDate, dt, symbol, expiry_date, option_type, strikePrice, old_OI, current_OI]
             self.objSheet.writeSheet(config.Notesheet, list_to_write, sheet_to_notify)
         except Exception as e:
             print('Exception in outliers Notification Process:', e)
@@ -287,7 +287,7 @@ class ScrapData:
 
                             if MOI != 'XX':
                                 if abs(float(MOI)) >= float(threshold):
-                                    self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate,
+                                    self.notifications(currentDate, strcurrentDateTime, str(strikePrice), scripName, expDate,
                                                        optionType, str(prevOI), str(OI))
 
                                     Flag = 1
@@ -337,7 +337,7 @@ class ScrapData:
                             # threshold = 0.0
                             if MOI != 'XX':
                                 if abs(float(MOI)) >= float(threshold):
-                                    self.notifications(strcurrentDateTime, str(strikePrice), scripName, expDate,
+                                    self.notifications(currentDate, strcurrentDateTime, str(strikePrice), scripName, expDate,
                                                        optionType, str(prevOI), str(OI))
 
                                     Flag = 1
