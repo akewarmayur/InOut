@@ -180,6 +180,7 @@ class ScrapData:
             instrument_data = pd.read_csv(io.StringIO(urlData.decode('utf-8')))
             exp_dt_stks = instrument_data[instrument_data['name'] == 'ACC']['expiry'].unique().tolist()[:2]
             expiry_date_indices = instrument_data[instrument_data['name'] == 'BANKNIFTY']['expiry'].unique().tolist()
+            # print(expiry_date_indices)
             expiry_date_indices.remove(exp_dt_stks[0])
 
             def change_format(dt):
@@ -190,7 +191,7 @@ class ScrapData:
             expiry_date_indices = list(map(change_format, expiry_date_indices))
 
             expiry_date_indices_monthly = expiry_date_stocks
-            expiry_date_indices_weekly = ['06 May 2021', '12 May 2021']
+            expiry_date_indices_weekly = expiry_date_indices[:2]
 
             return expiry_date_stocks, expiry_date_indices_monthly, expiry_date_indices_weekly
         except Exception as e:
