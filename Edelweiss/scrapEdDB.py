@@ -265,41 +265,41 @@ class ScrapData:
                     VOL = j['ceQt']['vol']
                     COI = float(COI)
 
-                    if COI != 0.0:
-                        if pvTime == '':
-                            MOI = 0
-                            prevOI = ''
-                            Flag = 0
+                    #if COI != 0.0:
+                    if pvTime == '':
+                        MOI = 0
+                        prevOI = ''
+                        Flag = 0
+                    else:
+                        timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
+                        if timeDiff == 0.0:
+                            timeDiff = 1.0
+                        que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND ScrapedDate=? AND StrTradeDateTime=?'.format(table_name)
+                        cur.execute(que, [scripName, strikePrice, optionType, currentDate, pvTime])
+                        rows = cur.fetchall()
+                        if len(rows) != 0:
+                            prevOI = rows[0][0]
+                            MOI = (OI - float(prevOI)) / timeDiff
                         else:
-                            timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
-                            if timeDiff == 0.0:
-                                timeDiff = 1.0
-                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND ScrapedDate=? AND StrTradeDateTime=?'.format(table_name)
-                            cur.execute(que, [scripName, strikePrice, optionType, currentDate, pvTime])
-                            rows = cur.fetchall()
-                            if len(rows) != 0:
-                                prevOI = rows[0][0]
-                                MOI = (OI - float(prevOI)) / timeDiff
-                            else:
-                                prevOI = ''
-                                MOI = 'XX'
-                            # Notification
-                            # threshold = 0.0
+                            prevOI = ''
+                            MOI = 'XX'
+                        # Notification
+                        # threshold = 0.0
 
-                            if MOI != 'XX':
-                                if abs(float(MOI)) >= float(threshold):
-                                    self.notifications(currentDate, strcurrentDateTime, str(strikePrice), scripName, expDate,
-                                                       optionType, str(prevOI), str(OI))
+                        if MOI != 'XX':
+                            if abs(float(MOI)) >= float(threshold):
+                                self.notifications(currentDate, strcurrentDateTime, str(strikePrice), scripName, expDate,
+                                                   optionType, str(prevOI), str(OI))
 
-                                    Flag = 1
-                                    print(f'{scripName}** {optionType} ** {Flag}')
-                                else:
-                                    Flag = 0
+                                Flag = 1
+                                print(f'{scripName}** {optionType} ** {Flag}')
                             else:
                                 Flag = 0
+                        else:
+                            Flag = 0
 
-                        self.objDB.insert(conn, currentDate, scripName, IndexORStocks, strikePrice, optionType, strcurrentDateTime, currentDateTime,
-                                          strExpiryDate, OI, COI, IV, VOL, MOI, Flag, table_name)
+                    self.objDB.insert(conn, currentDate, scripName, IndexORStocks, strikePrice, optionType, strcurrentDateTime, currentDateTime,
+                                      strExpiryDate, OI, COI, IV, VOL, MOI, Flag, table_name)
                     ctr = ctr + 1
 
                 if (j['peQt']['trdSym'][-2:] == 'PE'):
@@ -316,41 +316,41 @@ class ScrapData:
                     VOL = j['peQt']['vol']
                     COI = float(COI)
 
-                    if COI != 0.0:
-                        if pvTime == '':
-                            MOI = 0
-                            prevOI = ''
-                            Flag = 0
+                    #if COI != 0.0:
+                    if pvTime == '':
+                        MOI = 0
+                        prevOI = ''
+                        Flag = 0
+                    else:
+                        timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
+                        if timeDiff == 0.0:
+                            timeDiff = 1.0
+                        que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND ScrapedDate=? AND StrTradeDateTime=?'.format(table_name)
+                        cur.execute(que, [scripName, strikePrice, optionType, currentDate, pvTime])
+                        rows = cur.fetchall()
+                        if len(rows) != 0:
+                            prevOI = rows[0][0]
+                            MOI = (OI - float(prevOI)) / timeDiff
                         else:
-                            timeDiff = self.cal_timeDiff(strcurrentDateTime, pvTime)
-                            if timeDiff == 0.0:
-                                timeDiff = 1.0
-                            que = 'SELECT OI FROM {} WHERE ScripName=? AND StrikePrice=? AND OptionType=? AND ScrapedDate=? AND StrTradeDateTime=?'.format(table_name)
-                            cur.execute(que, [scripName, strikePrice, optionType, currentDate, pvTime])
-                            rows = cur.fetchall()
-                            if len(rows) != 0:
-                                prevOI = rows[0][0]
-                                MOI = (OI - float(prevOI)) / timeDiff
-                            else:
-                                prevOI = ''
-                                MOI = 'XX'
-                            # Notification
-                            # threshold = 0.0
-                            if MOI != 'XX':
-                                if abs(float(MOI)) >= float(threshold):
-                                    self.notifications(currentDate, strcurrentDateTime, str(strikePrice), scripName, expDate,
-                                                       optionType, str(prevOI), str(OI))
+                            prevOI = ''
+                            MOI = 'XX'
+                        # Notification
+                        # threshold = 0.0
+                        if MOI != 'XX':
+                            if abs(float(MOI)) >= float(threshold):
+                                self.notifications(currentDate, strcurrentDateTime, str(strikePrice), scripName, expDate,
+                                                   optionType, str(prevOI), str(OI))
 
-                                    Flag = 1
-                                    print(f'{scripName}** {optionType} ** {Flag}')
-                                else:
-                                    Flag = 0
+                                Flag = 1
+                                print(f'{scripName}** {optionType} ** {Flag}')
                             else:
                                 Flag = 0
+                        else:
+                            Flag = 0
 
-                        self.objDB.insert(conn, currentDate, scripName, IndexORStocks, strikePrice, optionType,
-                                          strcurrentDateTime,
-                                          currentDateTime, strExpiryDate, OI, COI, IV, VOL, MOI, Flag, table_name)
+                    self.objDB.insert(conn, currentDate, scripName, IndexORStocks, strikePrice, optionType,
+                                      strcurrentDateTime,
+                                      currentDateTime, strExpiryDate, OI, COI, IV, VOL, MOI, Flag, table_name)
 
             print(strcurrentDateTime)
             query = 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? AND ScrapedDate=? ORDER BY StrTradeDateTime DESC LIMIT 1'.format(table_name)
