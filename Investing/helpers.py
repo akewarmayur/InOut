@@ -38,11 +38,11 @@ class Help:
 
     def cvtNumberToDateTime(self, timestamp):
         dt = datetime.datetime.fromtimestamp(timestamp)
-        format = "%Y-%m-%d %H:%M:%S"
+        format = "%YYYY-%mm-%dd %HH:%MM:%SS" #YYYY-MM-DD HH:MI:SS
         # Convert to Asia/Kolkata time zone
         now_asia = dt.astimezone(timezone('Asia/Kolkata'))
         tt = now_asia.strftime(format)
-        dat = datetime.datetime.strptime(tt, '%Y-%m-%d %H:%M:%S')
+        dat = datetime.datetime.strptime(tt, '%YYYY-%mm-%dd %HH:%MM:%SS')
         return dat
 
 
@@ -97,6 +97,8 @@ class Help:
             folder_id = '1GYM6931x31C_uWS4WZXfUKauP-2499qb'
         elif resolution_type == 'W':
             folder_id = '1nrnY93F32BUasJrqH_JcXxdqwlYc4CXu'
+        elif resolution_type == '1':
+            folder_id = 'ylOFW98i2OzQxjyH9aEAomZsJKZoJoAF'
         return folder_id
 
     def check_previous_data_exist(self, file_name):
