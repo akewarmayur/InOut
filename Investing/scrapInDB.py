@@ -117,10 +117,10 @@ class ScrapData:
             #df = pd.DataFrame()
             df = pd.DataFrame(res)
             df.rename(columns = {"t": "datetime", "o":"open", "c":"close", "h":"high", "l":"low", "v":"volume"}, inplace = True)
-            new_columns = ['symbol', 'pid', 'resolution', 'datetime', 'open', 'close', 'high', 'low', 'volume']
+            new_columns = ['datetime', 'symbol', 'pid', 'resolution', 'open', 'close', 'high', 'low', 'volume']
             df['datetime'] = df['datetime'].apply(self.objHelp.cvtNumberToDateTime)
-            df.sort_values(by=['datetime'], inplace=True, ascending=False)
-            df.reset_index(drop=True, inplace=True)
+            # df.sort_values(by=['datetime'], inplace=True, ascending=False)
+            # df.reset_index(drop=True, inplace=True)
             df = df.reindex(columns=new_columns)
             #df.set_index('datetime', inplace=True)
             # df.to_csv('xx.csv', index=False)

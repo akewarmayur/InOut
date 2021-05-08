@@ -43,7 +43,7 @@ class Help:
         now_asia = dt.astimezone(timezone('Asia/Kolkata'))
         tt = now_asia.strftime(format)
         dat = datetime.datetime.strptime(tt, '%YYYY-%mm-%dd %HH:%MM:%SS')
-        return dat
+        return str(dat)
 
 
     def convertUTC_IST(self):

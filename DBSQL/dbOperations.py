@@ -28,7 +28,7 @@ class DBOperations:
                 host = "localhost",
                 user = "root",
                 passwd = "InOut@909",
-                database = 'invest'
+                database = 'investing'
             )
             # db = db.cursor()
             return conn
@@ -55,7 +55,7 @@ class DBOperations:
 
         TABLES['week'] = (
             "CREATE TABLE IF NOT EXISTS `week`("
-            "  `datetime` DATETIME NOT NULL,"
+            "  `datetime` TIMESTAMP NOT NULL,"
             "  `symbol` varchar(256) NOT NULL,"
             "  `pid` int(12) NOT NULL,"
             "  `resolution` varchar(4) NOT NULL,"
@@ -96,7 +96,7 @@ class DBOperations:
 
         TABLES['day'] = (
             "CREATE TABLE IF NOT EXISTS `day`("
-            "  `datetime` DATETIME NOT NULL,"
+            "  `datetime` TIMESTAMP NOT NULL,"
             "  `symbol` varchar(256) NOT NULL,"
             "  `pid` int(12) NOT NULL,"
             "  `resolution` varchar(4) NOT NULL,"
@@ -137,7 +137,7 @@ class DBOperations:
 
         TABLES['30_MIN'] = (
             "CREATE TABLE IF NOT EXISTS `30_MIN`("
-            "  `datetime` DATETIME NOT NULL,"
+            "  `datetime` TIMESTAMP NOT NULL,"
             "  `symbol` varchar(256) NOT NULL,"
             "  `pid` int(12) NOT NULL,"
             "  `resolution` varchar(4) NOT NULL,"
@@ -178,7 +178,7 @@ class DBOperations:
 
         TABLES['15_MIN'] = (
             "CREATE TABLE IF NOT EXISTS `15_MIN`("
-            "  `datetime` DATETIME NOT NULL,"
+            "  `datetime` TIMESTAMP NOT NULL,"
             "  `symbol` varchar(256) NOT NULL,"
             "  `pid` int(12) NOT NULL,"
             "  `resolution` varchar(4) NOT NULL,"
@@ -219,7 +219,7 @@ class DBOperations:
 
         TABLES['5_MIN'] = (
             "CREATE TABLE IF NOT EXISTS `5_MIN`("
-            "  `datetime` DATETIME NOT NULL,"
+            "  `datetime` TIMESTAMP NOT NULL,"
             "  `symbol` varchar(256) NOT NULL,"
             "  `pid` int(12) NOT NULL,"
             "  `resolution` varchar(4) NOT NULL,"
@@ -260,7 +260,7 @@ class DBOperations:
 
         TABLES['2_H'] = (
             "CREATE TABLE IF NOT EXISTS `2_H`("
-            "  `datetime` DATETIME NOT NULL,"
+            "  `datetime` TIMESTAMP NOT NULL,"
             "  `symbol` varchar(256) NOT NULL,"
             "  `pid` int(12) NOT NULL,"
             "  `resolution` varchar(4) NOT NULL,"
@@ -301,7 +301,7 @@ class DBOperations:
 
         TABLES['1_MIN'] = (
             "CREATE TABLE IF NOT EXISTS `1_MIN`("
-            "  `datetime` DATETIME NOT NULL,"
+            "  `datetime` TIMESTAMP NOT NULL,"
             "  `symbol` varchar(256) NOT NULL,"
             "  `pid` int(12) NOT NULL,"
             "  `resolution` varchar(4) NOT NULL,"
@@ -433,7 +433,7 @@ class DBOperations:
         engine = create_engine("mysql+pymysql://{user}:{pw}@localhost/{db}"
                                .format(user="root",
                                        pw="InOut@909",
-                                       db="invest"))
+                                       db="investing"))
 
         # df = pd.read_sql("select * from {}".format(table_name), engine)
         # final = pd.concat([df, data]).drop_duplicates().reset_index(drop=True)
