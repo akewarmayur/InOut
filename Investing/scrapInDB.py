@@ -124,6 +124,8 @@ class ScrapData:
             df = df.reindex(columns=new_columns)
             #df.set_index('datetime', inplace=True)
             # df.to_csv('xx.csv', index=False)
+            if df.empty:
+                return False, 0
             return True, df
         except Exception as e:
             print('Getting Response Exception:', e)

@@ -441,9 +441,11 @@ class DBOperations:
         # print(final.columns)
 
         try:
-            data.to_sql(table_name, con=engine, if_exists='append', chunksize=1000, index= False)
+            data.to_sql(table_name, con=engine, if_exists='append', chunksize=100, index= False)
         except Exception as e:
             print('Exception in converting DF to SQL:', e)
+
+
 
     def DFintoSQL(self, data, table_name):
         # print(data.columns)
@@ -474,33 +476,5 @@ class DBOperations:
 
 
 # obj = DBOperations()
-
-
-# dt = '4/1/2021 15:29'
-# sy = 'YESBANK'
-# # 'SELECT StrTradeDateTime FROM {} WHERE ScripName=? ORDER BY StrTradeDateTime DESC LIMIT 1'
-# query = "SELECT datetime FROM {} WHERE symbol=%s ORDER BY datetime DESC LIMIT 1"
-# res = obj.executeQuery(query, table_name, (sy,))
-# print(res)
-
-import time
-# obj.createDB()
-# time.sleep(3)
 # obj.createTables()
-# df = pd.read_csv('YESBANK_30.csv', index_col=False)
-# print(list(df.columns))
-# obj.DF2SQL(df, '30_MIN')
-# print(df.head())
-# obj.DFintoSQL(df, '5_min')
-# for index, row in df.iterrows():
-#     symbol = row['Symbol']
-#     pid = row['Pid']
-#     obj.inertStocks(symbol, int(pid))
-
-# t = ('4/1/2021 15:29', 'YESBANK', 18470, '30', 15.69999981, 15.69999981, 15.69999981, 15.69999981, 156900, None,
-#      None, None, None, None, None, None, None, None, None, 0.02, 'FALSE', None, None, None, None,
-#      15.94999981, -0.317461528,	1,	1,	-4,	15.69999981, 15.69999981, 15.69999981, 15.69999981)
-#
-# obj.inertData('30_MIN', t)
-
 
