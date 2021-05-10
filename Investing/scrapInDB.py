@@ -89,6 +89,7 @@ class ScrapData:
         try:
             # print('fromValue:', fromValue)
             # print('toValue:', toValue)
+            n = 1
             url = URL+'symbol='+str(symbol)+'&resolution='+str(resolution)+'&from='+str(fromValue)+'&to='+str(toValue)
             print('first:', url)
             response = requests.get(url, headers=self.USER_AGENT)
@@ -122,6 +123,9 @@ class ScrapData:
             # df.sort_values(by=['datetime'], inplace=True, ascending=False)
             # df.reset_index(drop=True, inplace=True)
             df = df.reindex(columns=new_columns)
+            df.drop(df.head(n).index, inplace=True)  # drop last n rows
+            # print(df.head())
+            # print(df.tail())
             #df.set_index('datetime', inplace=True)
             # df.to_csv('xx.csv', index=False)
             if df.empty:

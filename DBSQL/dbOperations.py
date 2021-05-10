@@ -464,7 +464,7 @@ class DBOperations:
             query = "SELECT * FROM {} WHERE symbol=%s ORDER BY datetime DESC LIMIT 200".format(table_name)
             res = self.executeQuery(query, table_name, (symbl,))
             columns = ['datetime', 'symbol', 'pid', 'resolution', 'open', 'close', 'high', 'low', 'volume',
-                       'ema_50', 'ema_100', 'ema_200', 'BBL_14_2.0', 'BBM_14_2.0', 'BBU_14_2.0', 'BBB_14_2.0',
+                       'EMA_50', 'EMA_100', 'EMA_200', 'BBL_14_2.0', 'BBM_14_2.0', 'BBU_14_2.0', 'BBB_14_2.0',
                        'RSI_14', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'ISA_9',
                        'ISB_26', 'ITS_9', 'IKS_26', 'ICS_26', 'per_change', 'volume_high_count', 'close_count',
                        'per_change_count', 'ha_close', 'ha_open', 'ha_high', 'ha_low']

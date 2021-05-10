@@ -27,7 +27,7 @@ class ProcessIn:
                         'volume', 'per_change', 'volume_high_count',
                         'close_count', 'per_change_count']
         self.fixed_columns = ['datetime', 'symbol', 'pid', 'resolution', 'open', 'close', 'high', 'low', 'volume']
-        self.ll = ['symbol', 'pid', 'resolution', 'open', 'close', 'high', 'low', 'volume', 'EMA_50', 'EMA_100', 'EMA_200',
+        self.ll = ['datetime', 'symbol', 'pid', 'resolution', 'open', 'close', 'high', 'low', 'volume', 'EMA_50', 'EMA_100', 'EMA_200',
              'BBL_14_2.0', 'BBM_14_2.0', 'BBU_14_2.0', 'BBB_14_2.0', 'RSI_14', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2',
              'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'ISA_9', 'ISB_26', 'ITS_9', 'IKS_26', 'ICS_26',
              'per_change', 'volume_high_count', 'close_count', 'per_change_count', 'ha_close', 'ha_open', 'ha_high',
@@ -70,7 +70,7 @@ class ProcessIn:
         del_200 = previous_df.iloc[200:]
         final = result.append(del_200)
         final.reset_index(inplace=True)
-
+        final = self.objCommon.drop_extra_columns(final, self.objHelp.fixed_columns)
         return final
 
     def get_slice(self, current_df, ran):
@@ -127,9 +127,19 @@ class ProcessIn:
                     self.objHelpIn.notifications(notify_df, candles_to_notify_from)
                     # data = self.objCommon.drop_extra_columns(data, self.fixed_columns)
                     # Insert into DB
-                    return True, current_data
+                    return True, 0
                 else:
                     return False, 0
+            else:
+                previous_data = self.objDB.get_previous_data(table_name, symbl)
+                end_date = self.get_end_date(end_datetime)
+                status, current_data = self.objScrap.scrap(URL, PID, symbl, item, end_date, no_of_days[i])
+                if status == True:
+                    data = self.concate(previous_data, current_data)
+                    return True, data
+                else:
+                    return False, previous_data
+
         except Exception as e:
             print('Exception in Scrapping & Saving data:', e)
             return False
@@ -164,8 +174,7 @@ class ProcessIn:
                                 if resolution == 'W':
                                     if datetime.date.today().isoweekday() == 1:
                                         status, data = self.process(URL, PID, symbl, item, no_of_days, i, end_datetime,
-                                                                    table_name
-                                                                    )
+                                                                    table_name)
                                         data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                         data = self.add_not_in(data)
                                         self.objDB.DFintoSQL(data, table_name)
@@ -194,7 +203,7 @@ class ProcessIn:
                                         print('No Data available in the given range of date')
 
                             else:
-                                status, data = self.objScrap.scrap(URL, PID, symbl, item, 0, 7)
+                                status, data = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
                                 # calculate indicators and upload to drive
                                 if status == True:
                                     # data.reset_index(drop=True, inplace=True)
@@ -220,8 +229,7 @@ class ProcessIn:
                         resolution = self.resolution_dict[item]
                         table_name = self.resolution_tables[item]
                         # URL, PID, symbl, row, end_date, no_of_days)
-                        query = "SELECT datetime FROM {} WHERE symbol=%s ORDER BY datetime DESC LIMIT 1".format(
-                            table_name)
+                        query = "SELECT datetime FROM {} WHERE symbol=%s ORDER BY datetime DESC LIMIT 1".format(table_name)
                         res = self.objDB.executeQuery(query, table_name, (symbl,))
                         if len(res) == 0:
                             status, data = self.objScrap.scrap(URL, PID, symbl, item, 0, no_of_days[i])
@@ -238,7 +246,14 @@ class ProcessIn:
                             else:
                                 print('No data available in the given range')
                         else:
-                            print('Data is already there')
+                            end_datetime = res[0][0]
+                            status, data = self.process(URL, PID, symbl, item, no_of_days, i, end_datetime, table_name, isMarketON=False)
+                            if status == True:
+                                data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                data = self.add_not_in(data)
+                                self.objDB.DFintoSQL(data, table_name)
+                            else:
+                                print(f"Data is not available from last date=> {end_datetime} to today")
             except Exception as e:
                 print('Exception in Investing Scrapping process:', e)
 
