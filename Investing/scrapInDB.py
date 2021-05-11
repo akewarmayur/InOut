@@ -119,14 +119,20 @@ class ScrapData:
             df = pd.DataFrame(res)
             df.rename(columns = {"t": "datetime", "o":"open", "c":"close", "h":"high", "l":"low", "v":"volume"}, inplace = True)
             new_columns = ['datetime', 'symbol', 'pid', 'resolution', 'open', 'close', 'high', 'low', 'volume']
-            df['datetime'] = df['datetime'].apply(self.objHelp.cvtNumberToDateTime)
+            # df.to_csv(str(symbol) + '_' + str(resolution) + '.csv')
+            if resolution == 'W':
+                df['datetime'] = df['datetime'].apply(self.objHelp.cvtNumberToDateTimeWeek)
+            elif resolution == 'D':
+                df['datetime'] = df['datetime'].apply(self.objHelp.cvtNumberToDateTimeDay)
+            else:
+                df['datetime'] = df['datetime'].apply(self.objHelp.cvtNumberToDateTime)
+            # df.to_csv(str(symbol) + '_' + str(resolution) + '.csv')
             # df.sort_values(by=['datetime'], inplace=True, ascending=False)
             # df.reset_index(drop=True, inplace=True)
             df = df.reindex(columns=new_columns)
-            df.drop(df.head(n).index, inplace=True)  # drop last n rows
-            # print(df.head())
-            # print(df.tail())
-            #df.set_index('datetime', inplace=True)
+            # df.drop(df.tail(5).index, inplace=True)  # drop last n rows
+            df.drop(df.head(n).index, inplace=True)  # drop first n rows
+            df.reset_index(drop=True, inplace=True)
             # df.to_csv('xx.csv', index=False)
             if df.empty:
                 return False, 0

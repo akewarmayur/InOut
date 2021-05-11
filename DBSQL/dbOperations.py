@@ -439,7 +439,7 @@ class DBOperations:
         # final = pd.concat([df, data]).drop_duplicates().reset_index(drop=True)
         # print(final.head())
         # print(final.columns)
-
+        data['datetime'] = data['datetime'].apply(lambda x: str(x))
         try:
             data.to_sql(table_name, con=engine, if_exists='append', chunksize=100, index= False)
         except Exception as e:

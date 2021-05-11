@@ -7,6 +7,7 @@ from common.common import CommonFunctions
 import warnings
 import os
 from common.gAPI import GoogleAPI
+from datetime import timedelta
 
 warnings.filterwarnings("ignore")
 
@@ -41,7 +42,26 @@ class Help:
         now_asia = dt.astimezone(timezone('Asia/Kolkata'))
         tt = now_asia.strftime(format)
         dat = datetime.datetime.strptime(tt, '%YYYY-%mm-%dd %HH:%MM:%SS')
-        return str(dat)
+        return dat
+
+    def cvtNumberToDateTimeWeek(self, timestamp):
+        dt = datetime.datetime.fromtimestamp(timestamp)
+        format = "%YYYY-%mm-%dd 00:00:00" #YYYY-MM-DD HH:MI:SS
+        # Convert to Asia/Kolkata time zone
+        now_asia = dt.astimezone(timezone('Asia/Kolkata'))
+        tt = now_asia.strftime(format)
+        dat = datetime.datetime.strptime(tt, '%YYYY-%mm-%dd 00:00:00')
+        dat = dat + timedelta(days=1)
+        return dat
+
+    def cvtNumberToDateTimeDay(self, timestamp):
+        dt = datetime.datetime.fromtimestamp(timestamp)
+        format = "%YYYY-%mm-%dd 00:00:00" #YYYY-MM-DD HH:MI:SS
+        # Convert to Asia/Kolkata time zone
+        now_asia = dt.astimezone(timezone('Asia/Kolkata'))
+        tt = now_asia.strftime(format)
+        dat = datetime.datetime.strptime(tt, '%YYYY-%mm-%dd 00:00:00')
+        return dat
 
 
     def convertUTC_IST(self):

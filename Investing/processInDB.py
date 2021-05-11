@@ -52,6 +52,7 @@ class ProcessIn:
         except Exception as exReadSheet:
             print(exReadSheet)
 
+
     def concate(self, previous_df, df_now):
         previous_df = self.objCommon.drop_extra_columns(previous_df, self.objHelp.fixed_columns)
         df_new = previous_df.loc[:, :'volume']
@@ -71,6 +72,10 @@ class ProcessIn:
         final = result.append(del_200)
         final.reset_index(inplace=True)
         final = self.objCommon.drop_extra_columns(final, self.objHelp.fixed_columns)
+
+        final.sort_values(by=['datetime'], inplace=True, ascending=False)
+        final.reset_index(drop=True, inplace=True)
+        final['datetime'] = final['datetime'].apply(lambda x: str(x))
         return final
 
     def get_slice(self, current_df, ran):
@@ -209,6 +214,7 @@ class ProcessIn:
                                     # data.reset_index(drop=True, inplace=True)
                                     data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                     data = self.add_not_in(data)
+                                    data['datetime'] = data['datetime'].apply(lambda x: str(x))
                                     # print(data.columns)
                                     # print(data.head(1))
                                     # print(len(data))
