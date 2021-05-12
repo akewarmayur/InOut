@@ -1,0 +1,16 @@
+certifi==2020.12.5
+chardet==4.0.0
+idna==2.10
+mysql==0.0.2
+mysql-connector-python==8.0.24
+mysqlclient==2.0.3
+protobuf==3.16.0
+pyaes==1.6.1
+pyasn1==0.4.8
+requests==2.25.1
+rsa==4.7.2
+selenium==3.141.0
+six==1.16.0
+telebot==0.0.4
+Telethon==1.21.1
+urllib3==1.26.4

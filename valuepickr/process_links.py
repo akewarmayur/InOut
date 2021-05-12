@@ -56,116 +56,118 @@ class ValuePickrProcess():
     def run(self,topicid,parameter):
         self.driver.get(parameter)
         # To scroll top of the page
-        for i in range(5):
-            self.driver.execute_script("window.scrollTo(0, 0);")
-            time.sleep(1)
+        # while True:
+        #     height = self.driver.execute_script("return document.body.scrollHeight")
+        #     self.driver.execute_script("window.scrollTo(0, 0);")
+        #     print("height===",height)
+        #     if height == 0:
+        #         break
+        #     time.sleep(1)
+        #     print("increasing loop")
+        # exit()
+        # for i in range(10):
+        #     self.driver.execute_script("window.scrollTo(0, 0);")
+        #     time.sleep(5)
 
+        #time.sleep(2)
         # Category name
         # categoryName= self.driver.find_element_by_xpath(config.CATEGORY_NAME_XPATH).text
         # print(categoryName)
-        categoryName = self.driver.find_element_by_class_name('topic-category').text
-        #categoryName = categoryName.replace("\n", ",")
-        try:
 
-            categorys = categoryName.split('\n')
-            # insertTopicCategory
-            for category in categorys:
-                db.insertTopicCategory(topicid,category)
-        except Exception as e:
-            print("Category parsing issue===:", e)
+        #categoryName = categoryName.replace("\n", ",")
+        while True:
+            try:
+                categoryName = self.driver.find_element_by_class_name('topic-category').text
+                categorys = categoryName.split('\n')
+                print("categorys====================",categorys)
+                # insertTopicCategory
+                for category in categorys:
+                    db.insertTopicCategory(topicid,category)
+                break
+            except Exception as e:
+                #print("Category parsing issue===:", e)
+                self.driver.execute_script("window.scrollTo(0, 0);")
+                time.sleep(3)
+                continue
+        #exit()
         # to scroll to bottom
         #self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        #self.loopthrough_read_div()
+            #self.loopthrough_read_div()
 
-        webclientLst=[]
-        crawler_post = self.driver.find_elements_by_class_name('topic-body')
-        for crawler in crawler_post:
-            metas = crawler.find_elements_by_class_name('topic-meta-data')
-            for row in metas:
-                userName = row.find_element_by_tag_name('a').text
-                #user_post_date = row.find_element_by_class_name('post-infos').text
-                user_post_date = row.find_element_by_css_selector('.relative-date').get_attribute('title')
-                print(userName,user_post_date)
-                db.insertUser(userName)
-                print("==========")
-                ## contents
-            cooked = crawler.find_elements_by_css_selector('.contents')
-            for cook in cooked:
-                user_post_desc = cook.find_element_by_tag_name('div').text
-                #print(user_post_desc)
-                print("==================================================")
-                #print(cooked)
-                ## Add userId
-                checkUserId = db.getUserDetails(userName)
-                checkUserId = checkUserId[0][0]
-                webclientLst.append((checkUserId,userName, user_post_date,user_post_desc))
-                #print("===================================================")
+        try:
 
-        SCROLL_PAUSE_TIME = 0.5
-        # Get scroll height
-        last_height = self.driver.execute_script("return document.body.scrollHeight")
-        print("last_height=========", last_height)
-        while True:
-            # Scroll down to bottom
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-            # Wait to load page
-            time.sleep(SCROLL_PAUSE_TIME)
-
-            # Calculate new scroll height and compare with last scroll height
-            new_height = self.driver.execute_script("return document.body.scrollHeight")
-            print("last_height=========", new_height)
-            if new_height == last_height:
-                break
-            last_height = new_height
-            ### topic-body crawler-post
+            webclientLst=[]
             crawler_post = self.driver.find_elements_by_class_name('topic-body')
             for crawler in crawler_post:
                 metas = crawler.find_elements_by_class_name('topic-meta-data')
                 for row in metas:
                     userName = row.find_element_by_tag_name('a').text
-                    # user_post_date = row.find_element_by_class_name('post-infos').text
-                    user_post_date = self.driver.find_element_by_css_selector('.relative-date').get_attribute(
-                        'title')
-                    print(userName, user_post_date)
+                    #user_post_date = row.find_element_by_class_name('post-infos').text
+                    user_post_date = row.find_element_by_css_selector('.relative-date').get_attribute('title')
+                    #print(userName,user_post_date)
                     db.insertUser(userName)
-                    print("==========")
+                    #print("==========")
                     ## contents
                 cooked = crawler.find_elements_by_css_selector('.contents')
                 for cook in cooked:
                     user_post_desc = cook.find_element_by_tag_name('div').text
-                    # print(user_post_desc)
+                    print(user_post_desc)
                     print("==================================================")
-                    # print(cooked)
+                    #print(cooked)
                     ## Add userId
                     checkUserId = db.getUserDetails(userName)
                     checkUserId = checkUserId[0][0]
-                    webclientLst.append((checkUserId, userName, user_post_date, user_post_desc))
+                    webclientLst.append((checkUserId,userName, user_post_date,user_post_desc))
+                    #print("===================================================")
 
-        ## check to till bottom
-        # for i in range(1,10):
-        #     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        #     time.sleep(2)
-        #     crawler_post = self.driver.find_elements_by_class_name('topic-body')
-        #     for crawler in crawler_post:
-        #         metas = crawler.find_elements_by_class_name('topic-meta-data')
-        #         for row in metas:
-        #             userName = row.find_element_by_tag_name('a').text
-        #             #user_post_date = row.find_element_by_class_name('post-infos').text
-        #             user_post_date = self.driver.find_element_by_css_selector('.relative-date').get_attribute('title')
-        #             db.insertUser(userName)
-        #         cooked = crawler.find_elements_by_css_selector('.contents')
-        #         for cook in cooked:
-        #             user_post_desc = cook.find_element_by_tag_name('div').text
-        #             print(user_post_desc)
-        #             print("===========================================")
-        #             ## Add userId
-        #             checkUserId = db.getUserDetails(userName)
-        #             checkUserId = checkUserId[0][0]
-        #             webclientLst.append((checkUserId,userName, user_post_date, user_post_desc))
-        #print(set(webclientLst))
-        for row in webclientLst:
-            db.insertTopicDiscussion(topicid,row[0],row[3],row[2])
+            SCROLL_PAUSE_TIME = 0.5
+            # Get scroll height
+            last_height = self.driver.execute_script("return document.body.scrollHeight")
+            print("last_height=========", last_height)
+            while True:
+                # Scroll down to bottom
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+                # Wait to load page
+                time.sleep(SCROLL_PAUSE_TIME)
+
+                # Calculate new scroll height and compare with last scroll height
+                new_height = self.driver.execute_script("return document.body.scrollHeight")
+                #print("last_height=========", new_height)
+                if new_height == last_height:
+                    break
+                last_height = new_height
+                ### topic-body crawler-post
+                crawler_post = self.driver.find_elements_by_class_name('topic-body')
+                for crawler in crawler_post:
+                    metas = crawler.find_elements_by_class_name('topic-meta-data')
+                    for row in metas:
+                        userName = row.find_element_by_tag_name('a').text
+                        # user_post_date = row.find_element_by_class_name('post-infos').text
+                        user_post_date = self.driver.find_element_by_css_selector('.relative-date').get_attribute(
+                            'title')
+                        #print(userName, user_post_date)
+                        db.insertUser(userName)
+                        #print("==========")
+                        ## contents
+                    cooked = crawler.find_elements_by_css_selector('.contents')
+                    for cook in cooked:
+                        user_post_desc = cook.find_element_by_tag_name('div').text
+                        print(user_post_desc)
+                        print("==================================================")
+                        # print(cooked)
+                        ## Add userId
+                        checkUserId = db.getUserDetails(userName)
+                        checkUserId = checkUserId[0][0]
+                        webclientLst.append((checkUserId, userName, user_post_date, user_post_desc))
+        except Exception as e:
+            pass
+        try:
+
+            for row in webclientLst:
+                db.insertTopicDiscussion(topicid,row[0],row[3],row[2])
+        except Exception as e:
+            pass
 
     def bottom_down(self):
         SCROLL_PAUSE_TIME = 0.5
@@ -204,10 +206,12 @@ if __name__=='__main__':
         topics = db.getReadTopic()
 
         try:
+            #obj.run(282, 'https://forum.valuepickr.com/t/indiamart-intermesh-indian-alibaba/23734/250')
             for topic in topics:
-                #print(topic[0],topic[2])
+                print("topic Id ========",topic[0])
                 obj.run(topic[0],topic[2])
-                exit()
+                time.sleep(2)
+
         except Exception as e:
             print("Innner Error===", e)
 
