@@ -3,7 +3,7 @@ import mysql.connector
 import valuepickrconfig as config
 
 def create_database():
-    dataBase = mysql.connector.connect(host='localhost', user='admin', password='VpU$er#2021')
+    dataBase = mysql.connector.connect(host='localhost', user='admin', password='R@ting#2021')
     # preparing a cursor object
     cursorObject = dataBase.cursor()
     # creating database
@@ -12,7 +12,7 @@ def create_database():
     return
 
 def connect2Mysql(inputDict=config.LOCALMYSQL):
-    inputDict['cnx'] = mysql.connector.connect(host='localhost', user='admin', password='VpU$er#2021',database='valuepickrDB')
+    inputDict['cnx'] = mysql.connector.connect(host='localhost', user='admin', password='R@ting#2021',database='valuepickrDB')
     return(inputDict['cnx'])
 
 def create_table_Topic():
@@ -86,7 +86,7 @@ def create_table_TopicDiscussion():
 
 
 def check_connection():
-    print(mysql.connector.connect(host='localhost',user='admin',password='VpU$er#2021'))
+    print(mysql.connector.connect(host='localhost',user='admin',password='R@ting#2021'))
 
 
 def insertTopic(topicName, topicURL):

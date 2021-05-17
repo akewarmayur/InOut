@@ -10,7 +10,7 @@ DIV_LIST_ANCHOR_GET_ARTIBUTE_PROP="href"
 LOCALMYSQL = {
         'host':'localhost',
         'user': 'admin',
-        'password': 'VpU$er#2021',
+        'password': 'R@ting#2021',
         'db': 'valuepickrDB'
 }
 
