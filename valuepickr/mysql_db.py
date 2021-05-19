@@ -2,8 +2,15 @@
 import mysql.connector
 import valuepickrconfig as config
 
+LOCALMYSQL = {
+        'host':'localhost',
+        'user': 'root',
+        'password': 'R@ting#2021',#
+        'db': 'valuepickrDB'
+}
+
 def create_database():
-    dataBase = mysql.connector.connect(host='localhost', user='admin', password='R@ting#2021')
+    dataBase = mysql.connector.connect(host=LOCALMYSQL['host'], user=LOCALMYSQL['user'] ,password=LOCALMYSQL['password'])
     # preparing a cursor object
     cursorObject = dataBase.cursor()
     # creating database
@@ -11,12 +18,12 @@ def create_database():
     print("database created")
     return
 
-def connect2Mysql(inputDict=config.LOCALMYSQL):
-    inputDict['cnx'] = mysql.connector.connect(host='localhost', user='admin', password='R@ting#2021',database='valuepickrDB')
+def connect2Mysql(inputDict=LOCALMYSQL):
+    inputDict['cnx'] = mysql.connector.connect(host=LOCALMYSQL['host'], user=LOCALMYSQL['user'],password=LOCALMYSQL['password'],database=LOCALMYSQL['db'])
     return(inputDict['cnx'])
 
 def create_table_Topic():
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
+    mysqlDB = connect2Mysql(LOCALMYSQL)
     mysqlCursor = mysqlDB.cursor()
     # creating table
     queryCmd = """CREATE TABLE Topic (
@@ -32,7 +39,7 @@ def create_table_Topic():
     print("User Topic created")
 
 def create_table_User():
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
+    mysqlDB = connect2Mysql(LOCALMYSQL)
     mysqlCursor = mysqlDB.cursor()
     # creating table
     queryCmd = """CREATE TABLE User (
@@ -47,7 +54,7 @@ def create_table_User():
     mysqlDB.close()
 
 def create_table_TopicCategory():
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
+    mysqlDB = connect2Mysql(LOCALMYSQL)
     mysqlCursor = mysqlDB.cursor()
     # creating table
     queryCmd = """CREATE TABLE TopicCategory (
@@ -65,7 +72,7 @@ def create_table_TopicCategory():
 
 
 def create_table_TopicDiscussion():
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
+    mysqlDB = connect2Mysql(LOCALMYSQL)
     mysqlCursor = mysqlDB.cursor()
     # creating table
     queryCmd = """CREATE TABLE TopicDiscussion (
@@ -86,28 +93,30 @@ def create_table_TopicDiscussion():
 
 
 def check_connection():
-    print(mysql.connector.connect(host='localhost',user='admin',password='R@ting#2021'))
+    print(mysql.connector.connect(host=LOCALMYSQL['host'], user=LOCALMYSQL['user'] ,password=LOCALMYSQL['password']))
 
 
 def insertTopic(topicName, topicURL):
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
-    mysqlCursor = mysqlDB.cursor(config.LOCALMYSQL)
-    mysqlCursor.execute("""use {};""".format('valuepickrDB'))
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
 
     try:
-        #print("""{}, '{}', {}, {} """.format(int(titleId), titleType, str(Country), flag) )
         mysqlCursor.callproc('SP_Insert_topic', [topicName, topicURL])
         mysqlDB.commit()
-        #print("Records insert successfully======")
+        # results = mysqlCursor.fetchone()
+        # print(results[0])
+        # if results ==1:
+        #     print("Records Already exist !!")
     except Exception as e:
         print("error==", e)
     mysqlCursor.close()
     mysqlDB.close()
 
 def getUserDetails(username):
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
-    mysqlCursor = mysqlDB.cursor(config.LOCALMYSQL)
-    mysqlCursor.execute("""use {};""".format('valuepickrDB'))
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
     output=[]
     try:
         mysqlCursor.callproc('getUserDetails', [username])
@@ -120,13 +129,13 @@ def getUserDetails(username):
     mysqlDB.close()
     return output
 
-def getReadTopic():
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
-    mysqlCursor = mysqlDB.cursor(config.LOCALMYSQL)
-    mysqlCursor.execute("""use {};""".format('valuepickrDB'))
+def getReadTopic(tpurl,tpname):
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
     output=[]
     try:
-        mysqlCursor.callproc('getTopic')
+        mysqlCursor.callproc('getTopic',[tpurl,tpname])
         for result in mysqlCursor.stored_results():
             output = result.fetchall()
     except Exception as e:
@@ -136,10 +145,12 @@ def getReadTopic():
     mysqlDB.close()
     return output
 
+
+
 def insertTopicCategory(TopicId,CategoryName):
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
-    mysqlCursor = mysqlDB.cursor(config.LOCALMYSQL)
-    mysqlCursor.execute("""use {};""".format('valuepickrDB'))
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
     try:
         mysqlCursor.callproc('SP_Insert_topicCategory', [TopicId,CategoryName])
         mysqlDB.commit()
@@ -149,12 +160,12 @@ def insertTopicCategory(TopicId,CategoryName):
     mysqlCursor.close()
     mysqlDB.close()
 
-def insertTopicDiscussion(topicid,userid,discussiontext,discussiondate):
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
-    mysqlCursor = mysqlDB.cursor(config.LOCALMYSQL)
-    mysqlCursor.execute("""use {};""".format('valuepickrDB'))
+def insertTopicDiscussion(topicid,userid,discussiontext,discussiondatecpy):
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
     try:
-        mysqlCursor.callproc('SP_Insert_TopicDiscussion', [topicid,userid,discussiontext,discussiondate])
+        mysqlCursor.callproc('SP_Insert_TopicDiscussion', [topicid,userid,discussiontext,discussiondatecpy])
         mysqlDB.commit()
         #print("Records insert successfully======")
     except Exception as e:
@@ -163,9 +174,9 @@ def insertTopicDiscussion(topicid,userid,discussiontext,discussiondate):
     mysqlDB.close()
 
 def insertUser(username):
-    mysqlDB = connect2Mysql(config.LOCALMYSQL)
-    mysqlCursor = mysqlDB.cursor(config.LOCALMYSQL)
-    mysqlCursor.execute("""use {};""".format('valuepickrDB'))
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
     try:
         d= mysqlCursor.callproc('SP_Insert_User', [username])
         mysqlDB.commit()
@@ -175,9 +186,41 @@ def insertUser(username):
     mysqlCursor.close()
     mysqlDB.close()
 
+def convvartoDate(dateCol):
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
+    output=[]
+    try:
+        mysqlCursor.callproc('ConvStrToDate', [dateCol])
+        for result in mysqlCursor.stored_results():
+            output = result.fetchall()
+    except Exception as e:
+        print("error==", e)
+
+    mysqlCursor.close()
+    mysqlDB.close()
+    return output[0]
+
+def checkDiscussionDate(dateCol):
+    mysqlDB = connect2Mysql(LOCALMYSQL)
+    mysqlCursor = mysqlDB.cursor(LOCALMYSQL)
+    mysqlCursor.execute("""use {};""".format(LOCALMYSQL['db']))
+    output=[]
+    try:
+        mysqlCursor.callproc('checkDiscussionDate', [dateCol])
+        for result in mysqlCursor.stored_results():
+            output = result.fetchall()
+    except Exception as e:
+        print("error==", e)
+
+    mysqlCursor.close()
+    mysqlDB.close()
+    return output[0]
+
 
 ## Check Connection
-#check_connection()
+##check_connection()
 ## Create Database
 #create_database()
 #create_table_Topic()

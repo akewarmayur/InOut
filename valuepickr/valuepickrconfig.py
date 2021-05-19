@@ -6,14 +6,6 @@ QUERY_PARAMETER="#stock-opportunities:untested-but-worth-a-good-look after:" #20
 DIV_LIST="topic"
 DIV_LIST_ANCHOR="a"
 DIV_LIST_ANCHOR_GET_ARTIBUTE_PROP="href"
-## database
-LOCALMYSQL = {
-        'host':'localhost',
-        'user': 'admin',
-        'password': 'R@ting#2021',
-        'db': 'valuepickrDB'
-}
-
 ## Category Name
 CATEGORY_NAME_XPATH='//*[@id="ember81"]'
 
