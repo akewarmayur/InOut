@@ -7,7 +7,7 @@ import zipfile
 import datetime
 from selenium.webdriver.chrome.options import Options
 import getpass
-
+import mysql_connector as db
 
 Username = getpass.getuser()
 options = Options()
@@ -52,7 +52,7 @@ class FavCopy():
         except Exception as e:
             print(e)
 
-    def run(self,url):
+    def run(self,url,input_date):
         self.driver.get(url)
         try:
 
@@ -73,10 +73,21 @@ class FavCopy():
             self.extarcted_files(filePath,dest)
             print("Done extraction csv file!!")
             self.close_driver()
+            ## file path
+            #favcopyPath = 'D:/Projects/django_projects/API_tele/nseindia/contents/fo11MAY2021bhav.csv'
+            favcopyPath = os.getcwd() + "\\contents\\" + filename
+            favcopyPath=favcopyPath[0:-4]
+            csvPath=favcopyPath
+            favcopyPath=favcopyPath.replace('\\', '/')
+            print(favcopyPath)
+            db.insertFno(favcopyPath,input_date)
+            #exit()
             # Delete
             # zip
             if os.path.exists(filePath):
                 os.remove(filePath)
+                os.remove(csvPath)
+
 
 
         except Exception as e:
@@ -106,7 +117,9 @@ if __name__=='__main__':
     if input_date == "":
         input_date=date_object
 
+    # https://www1.nseindia.com/ArchieveSearch?h_filetype=fobhav&date=11-05-2021&section=FO
+    #input_date='11-05-2021'
     url="https://www1.nseindia.com/ArchieveSearch?h_filetype=fobhav&date="+str(input_date)+"&section=FO"
     print("url====",url)
-    obj.run(url)
+    obj.run(url,input_date)
     #obj.close_driver()
