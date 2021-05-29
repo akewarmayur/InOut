@@ -182,6 +182,7 @@ class ProcessIn:
                                                                     table_name)
                                         data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                         data = self.add_not_in(data)
+                                        data = data[self.ll]
                                         self.objDB.DFintoSQL(data, table_name)
                                         if status == False:
                                             print('No Data available in the given range of date')
@@ -195,6 +196,7 @@ class ProcessIn:
                                                                     table_name)
                                         data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                         data = self.add_not_in(data)
+                                        data = data[self.ll]
                                         self.objDB.DFintoSQL(data, table_name)
                                         if status == False:
                                             print('No Data available in the given range of date')
@@ -203,6 +205,7 @@ class ProcessIn:
                                                                 table_name)
                                     data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                     data = self.add_not_in(data)
+                                    data = data[self.ll]
                                     self.objDB.DFintoSQL(data, table_name)
                                     if status == False:
                                         print('No Data available in the given range of date')
@@ -215,6 +218,7 @@ class ProcessIn:
                                     data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                     data = self.add_not_in(data)
                                     data['datetime'] = data['datetime'].apply(lambda x: str(x))
+                                    data = data[self.ll]
                                     # print(data.columns)
                                     # print(data.head(1))
                                     # print(len(data))
@@ -244,6 +248,7 @@ class ProcessIn:
                                 # data.reset_index(drop=True, inplace=True)
                                 data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                 data = self.add_not_in(data)
+                                data = data[self.ll]
                                 # print(data.columns)
                                 # print(data.head(1))
                                 # print(len(data))
@@ -257,6 +262,7 @@ class ProcessIn:
                             if status == True:
                                 data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                 data = self.add_not_in(data)
+                                data = data[self.ll]
                                 self.objDB.DFintoSQL(data, table_name)
                             else:
                                 print(f"Data is not available from last date=> {end_datetime} to today")

@@ -142,10 +142,13 @@ class ScrapData:
             return False, 0
 
     def cal_indicators(self, temp, ha=False, all=True):
+
         try:
             if all == True:
                 # print(temp.head(2))
                 temp.ta.strategy(self.objIndicators.CustomStrategy)
+
+            temp.sort_values(by=['datetime'], inplace=True, ascending=False)
 
             # calculate custom indicators
             temp = self.objIndicators.custom_indicators(temp, 'per_change')
@@ -171,6 +174,7 @@ class ScrapData:
             #     temp.ta.strategy(self.objIndicators.CustomStrategy)
 
             # calculate custom indicators
+            temp.sort_values(by=['datetime'], inplace=True, ascending=False)
             temp = self.objIndicators.custom_indicators(temp, 'per_change')
 
             temp = self.objIndicators.custom_indicators(temp, 'volume_high_count')
