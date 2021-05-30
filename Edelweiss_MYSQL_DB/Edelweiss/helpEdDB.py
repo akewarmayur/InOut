@@ -84,8 +84,8 @@ class HelpEdDB:
             #if file_id == 0:
             # Create new DB
             ## Jitendra Changes
-            self.objDBOP.create_mysql_database(config.DB_Name)
-            conn = self.objDBOP.connect2Mysql(config.DB_Name)
+            #self.objDBOP.create_mysql_database(config.DB_Name)
+            conn = self.objDBOP.connect2Mysql()
             print("conn====",conn)
             #exit()
 

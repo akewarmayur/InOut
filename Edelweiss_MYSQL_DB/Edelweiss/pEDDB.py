@@ -70,14 +70,14 @@ class ProcessEd(threading.Thread):
             print('Exception while saving files on drive at the end of day', e)
             return False
 
-    def process(self, symbol, table_name, expiry_date, iterations,  threshold, pVtime,DB_Name):
+    def process(self, symbol, table_name, expiry_date, iterations,  threshold, pVtime):
         #objGAPI = GoogleAPI()
         objScrap = ScrapData()
         objCommon = CommonFunctions()
         try:
             exd = expiry_date.replace(' ', '_')
             file_name = symbol + '_' + exd + '.csv'
-            status, pVtime = objScrap.start_scraping(str(symbol), expiry_date, threshold, pVtime,DB_Name)
+            status, pVtime = objScrap.start_scraping(str(symbol), expiry_date, threshold, pVtime)
             if iterations == 30:
                 objHDB = HelpEdDB()
                 if status == True:
@@ -104,7 +104,7 @@ class ProcessEd(threading.Thread):
             print('Exception in Edle Scrapping Process:', e)
             return False, pVtime
 
-    def start(self, q, result, isMarketON,  diction,DB_Name): #FolderIDs
+    def start(self, q, result, isMarketON,  diction): #FolderIDs
         while not q.empty():
             work = q.get()
             if work[1] == 'UPLOAD_THREAD':
@@ -191,7 +191,7 @@ class ProcessEd(threading.Thread):
                                 #folder_ID = FolderIDs[expDate]
                                 exd = expDate.replace(' ', '_')
                                 table_name = config.TableName + exd
-                                status, pVtime = self.process(symbol, table_name, expDate, ns.iterations,  threshold, pVtime,DB_Name)
+                                status, pVtime = self.process(symbol, table_name, expDate, ns.iterations,  threshold, pVtime)
                             else:
                                 ScrapedFor = ScrapedFor.split('_')
                                 expDate = ScrapedFor[0]
@@ -199,7 +199,7 @@ class ProcessEd(threading.Thread):
                                 #folder_ID = FolderIDs[expDate]
                                 exd = expDate.replace(' ', '_')
                                 table_name = config.TableName + exd
-                                status, pVtime = self.process(symbol, table_name, expDate, ns.iterations,  threshold, pVtime,DB_Name)
+                                status, pVtime = self.process(symbol, table_name, expDate, ns.iterations,  threshold, pVtime)
                             if status == True:
                                 ns.iterations += 1
                             if ns.iterations == 31:
@@ -225,7 +225,7 @@ class ProcessEd(threading.Thread):
                             #folder_ID = FolderIDs[expDate]
                             exd = expDate.replace(' ', '_')
                             table_name = config.TableName + exd
-                            status, pVtime = self.process(symbol, table_name, expDate, it,  threshold, pVtime,DB_Name)
+                            status, pVtime = self.process(symbol, table_name, expDate, it,  threshold, pVtime)
                         else:
                             ScrapedFor = ScrapedFor.split('_')
                             expDate = ScrapedFor[0]
@@ -233,7 +233,7 @@ class ProcessEd(threading.Thread):
                             #folder_ID = FolderIDs[expDate]
                             exd = expDate.replace(' ', '_')
                             table_name = config.TableName + exd
-                            status, pVtime = self.process(symbol, table_name, expDate, it, threshold, pVtime,DB_Name)
+                            status, pVtime = self.process(symbol, table_name, expDate, it, threshold, pVtime)
 
                 except Exception as e:
                     print(e)

@@ -216,7 +216,7 @@ class ScrapData:
         return timeDiff
 
 
-    def start_scraping(self, scripName, expDate, threshold, pvTime,DB_Name):
+    def start_scraping(self, scripName, expDate, threshold, pvTime):
         exd = expDate.replace(' ', '_')
         table_name = config.TableName + exd
         try:
@@ -240,7 +240,7 @@ class ScrapData:
 
             if pvTime == '':
                 #conn = self.objDB.create_connection()
-                conn = self.objDB.connect2Mysql(DB_Name)
+                conn = self.objDB.connect2Mysql()
                 #.format(table_name)
                 query = "SELECT StrTradeDateTime FROM "+table_name+" WHERE ScripName='"+scripName+"' AND ScrapedDate='"+currentDate+"' ORDER BY StrTradeDateTime DESC LIMIT 1"
                 cur = conn.cursor()
@@ -254,7 +254,7 @@ class ScrapData:
                     pvTime = ''
             else:
                 #conn = self.objDB.create_connection()
-                conn = self.objDB.connect2Mysql(DB_Name)
+                conn = self.objDB.connect2Mysql()
                 cur = conn.cursor()
 
             for j in jsons:
