@@ -2,18 +2,18 @@ import pandas_ta as ta
 
 
 class Indicators:
-    def __init__(self):
-        self.CustomStrategy = ta.Strategy(
-            name="First",
-            description="EMA 50,100, 200, BBANDS, RSI, PSa2 and Ichimocloud",
-            ta=[
-                {"kind": "ema", "length": 50},
-                {"kind": "ema", "length": 100},
-                {"kind": "ema", "length": 200},
-                {"kind": "bbands", "length": 14},
-                {"kind": "rsi", "length": 14},
-                {"kind": "psar"},
-                {"kind": "ichimoku"}, ])
+    # def __init__(self):
+    #     self.CustomStrategy = ta.Strategy(
+    #         name="First",
+    #         description="ema 50,100, 200, BBANDS, RSI, PSa2 and Ichimocloud",
+    #         ta=[
+    #             {"kind": "ema", "length": 50},
+    #             {"kind": "ema", "length": 100},
+    #             {"kind": "ema", "length": 200},
+    #             {"kind": "bbands", "length": 14},
+    #             {"kind": "rsi", "length": 14},
+    #             {"kind": "psar"},
+    #             {"kind": "ichimoku"}, ])
 
     def ta_indicators(self, df):
         try:

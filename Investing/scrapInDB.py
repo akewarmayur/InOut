@@ -146,7 +146,8 @@ class ScrapData:
         try:
             if all == True:
                 # print(temp.head(2))
-                temp.ta.strategy(self.objIndicators.CustomStrategy)
+                temp = self.objIndicators.ta_indicators(temp)
+                #temp.ta.strategy(self.objIndicators.CustomStrategy)
 
             temp.sort_values(by=['datetime'], inplace=True, ascending=False)
 
