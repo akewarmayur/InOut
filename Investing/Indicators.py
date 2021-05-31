@@ -15,6 +15,23 @@ class Indicators:
                 {"kind": "psar"},
                 {"kind": "ichimoku"}, ])
 
+    def ta_indicators(self, df):
+        try:
+            df['EMA_50'] = df.ta.ema(length=50)
+            df['EMA_100'] = df.ta.ema(length=100)
+            df['EMA_200'] = df.ta.ema(length=200)
+            df[['BBL_14_2.0', 'BBM_14_2.0', 'BBU_14_2.0', 'BBB_14_2.0']] = df.ta.bbands(length=14)
+            df['RSI_14'] = df.ta.rsi(length=14)
+            df[['PSARl_0.02_0.2', 'BPSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2']] = df.ta.psar()
+            try:
+                df[['ISA_9', 'ISB_26', 'ITS_9', 'IKS_26', 'ICS_26']] = df.ta.ichimoku()[0]
+            except:
+                pass
+            return df
+        except Exception as e:
+            print("Exception in ta indicators:", e)
+            return df
+
     def custom_indicators(self, df, indicator_name):
         try:
             no_of_rows = len(df.index)
