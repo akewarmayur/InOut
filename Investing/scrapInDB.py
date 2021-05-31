@@ -160,6 +160,9 @@ class ScrapData:
 
             temp = self.objIndicators.custom_indicators(temp, 'per_change_count')
 
+            temp['volume_high_count'] = temp.apply(lambda x: self.change_sign(x.per_change, x.volume_high_count), axis=1)
+            temp['close_count'] = temp.apply(lambda x: self.change_sign(x.per_change, x.close_count), axis=1)
+
             if ha == True:
                 temp = self.objIndicators.cal_heiken_ashi(temp)
 
@@ -167,6 +170,13 @@ class ScrapData:
         except Exception as e:
             print('Exception in calculating Indicators:', e)
             return temp
+
+    def change_sign(self, x, y):
+        if x < 0:
+            y = y * -1
+            return y
+        else:
+            return y
 
     def cal_indicators_notify(self, temp):
         try:
@@ -183,6 +193,9 @@ class ScrapData:
             temp = self.objIndicators.custom_indicators(temp, 'close_count')
 
             temp = self.objIndicators.custom_indicators(temp, 'per_change_count')
+
+            temp['volume_high_count'] = temp.apply(lambda x: self.change_sign(x.per_change, x.volume_high_count), axis=1)
+            temp['close_count'] = temp.apply(lambda x: self.change_sign(x.per_change, x.close_count), axis=1)
 
             # if ha == True:
             #     temp = self.objIndicators.cal_heiken_ashi(temp)
