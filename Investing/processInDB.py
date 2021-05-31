@@ -181,6 +181,7 @@ class ProcessIn:
                                         status, data = self.process(URL, PID, symbl, item, no_of_days, i, end_datetime,
                                                                     table_name)
                                         data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                        data = data[:abs(len(data) - 200)]
                                         data = self.add_not_in(data)
                                         data = data[self.ll]
                                         self.objDB.DFintoSQL(data, table_name)
@@ -195,6 +196,7 @@ class ProcessIn:
                                         status, data = self.process(URL, PID, symbl, item, no_of_days, i, end_datetime,
                                                                     table_name)
                                         data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                        data = data[:abs(len(data) - 200)]
                                         data = self.add_not_in(data)
                                         data = data[self.ll]
                                         self.objDB.DFintoSQL(data, table_name)
@@ -204,6 +206,7 @@ class ProcessIn:
                                     status, data = self.process(URL, PID, symbl, item, no_of_days, i, end_datetime,
                                                                 table_name)
                                     data = self.objScrap.cal_indicators(data, ha=True, all=True)
+                                    data = data[:abs(len(data) - 200)]
                                     data = self.add_not_in(data)
                                     data = data[self.ll]
                                     self.objDB.DFintoSQL(data, table_name)
@@ -263,7 +266,9 @@ class ProcessIn:
                                 data = self.objScrap.cal_indicators(data, ha=True, all=True)
                                 data = self.add_not_in(data)
                                 data = data[self.ll]
-                                self.objDB.DFintoSQL(data, table_name)
+                                data = data[:abs(len(data) - 200)]
+                                self.objDB.DF2SQL(data, table_name)
+                                #self.objDB.DFintoSQL(data, table_name)
                             else:
                                 print(f"Data is not available from last date=> {end_datetime} to today")
             except Exception as e:

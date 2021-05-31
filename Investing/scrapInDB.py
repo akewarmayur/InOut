@@ -142,7 +142,7 @@ class ScrapData:
             return False, 0
 
     def cal_indicators(self, temp, ha=False, all=True):
-
+        temp.sort_values(by=['datetime'], inplace=True, ascending=True)
         try:
             if all == True:
                 # print(temp.head(2))
