@@ -114,31 +114,52 @@ class MainEdle:
 
 if __name__ == '__main__':
     my_parser = argparse.ArgumentParser()
+    # jiten,
     my_parser.add_argument('--machine_name', action='store', type=str, required=True)
-    my_parser.add_argument('--env', action='store', type=str, required=True)
-    my_parser.add_argument('--sesRestart', action='store', type=str, required=True)
+    # my_parser.add_argument('--env', action='store', type=str, required=True)
+    # my_parser.add_argument('--sesRestart', action='store', type=str, required=True)
     args = my_parser.parse_args()
     objpEd = ProcessEd()
     objMain = MainEdle()
-    machine_name = args.machine_name
-    config.env = args.env
-    config.sessionRestart = args.sesRestart
+
+    ### manual run
     # config.env = 'QA'
     # machine_name = 'Index'
     # config.sessionRestart = 'no'
+    # config.machine_name = machine_name
+    # config.DB_Name = machine_name + '.db'
+    # config.DB_Name = config.DB_Name.replace('.', '')
+    #############
+    ## COmmand line
+    config.env = 'QA'
+    config.sessionRestart = 'no'
+    #machine_name = 'Index'
+    machine_name = args.machine_name
     config.machine_name = machine_name
     config.DB_Name = machine_name + '.db'
-    service = objMain.objGAPI.intiate_gdAPI()
+    config.DB_Name = config.DB_Name.replace('.', '')
+    # x = list(config.DB_Name)
+    # alllst=[]
+    # for row in x:
+    #     if "'" in row or "." in row:
+    #         continue
+    #     else:
+    #         alllst.append(row)
+    # config.DB_Name = ''.join(alllst)
+
+    ##########################
+    ###
+    #service = objMain.objGAPI.intiate_gdAPI()
     q = Queue(maxsize=0)
     # Use many threads (50 max, or one for each url)
     isMarketON, symbol_list, diction, EDStocks, EDIndicesM, EDIndicesW, Ndiction = objMain.get_symbol_list(machine_name)
     # print(symbol_list)
     # print(diction)
 
-    FolderIDs = objMain.create_folders(service, EDStocks, EDIndicesM, EDIndicesW)
-    status = objMain.objHelpDB.downloadDB(service, EDStocks, EDIndicesM, EDIndicesW)
-    objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW, config.sessionRestart)
-    # status = True
+    #FolderIDs = objMain.create_folders(service, EDStocks, EDIndicesM, EDIndicesW)
+    status = objMain.objHelpDB.create_tables(EDStocks, EDIndicesM, EDIndicesW)
+    #objMain.objHelpDB.downLoadAllCSV(service, Ndiction, EDStocks, EDIndicesM, EDIndicesW, config.sessionRestart)
+    #status = True
     #symbol_list = symbol_list[:1]
     symbol_list.append('UPLOAD_THREAD')
     # b['UPLOAD_THREAD'] = 'UPLOAD_DB'
@@ -146,7 +167,9 @@ if __name__ == '__main__':
 
     # Insert Thresholds from CSV
     dfThreshold = pd.read_csv(os.getcwd() + '/thresholds.csv')
-    conn = objMain.objDBOP.create_connection()
+    conn = objMain.objDBOP.connect2Mysql() # MYSQL
+    #objMain.objDBOP.create_mysql_database(config.DB_Name)  # SQLIte
+
     objMain.objDBOP.create_tableThreshold(conn)
     time.sleep(1)
     for i, row in dfThreshold.iterrows():
@@ -155,8 +178,8 @@ if __name__ == '__main__':
         EXD = row['ExpiryDate']
         objMain.objHelpDB.InsertThreshold(conn, ScripName, EXD, Threshold)
     conn.close()
-
-    print(symbol_list)
+    #print(symbol_list)
+    #print("sytaus true===")
     if status == True:
         num_theads = len(symbol_list)
         # Populating Queue with tasks
@@ -166,10 +189,9 @@ if __name__ == '__main__':
             # need the index and the url in each queue item.
             q.put((i, symbol_list[i]))
 
-
         for i in range(num_theads):
             logging.debug('Starting thread ', i)
-            worker = Thread(target=objpEd.start, args=(q, results, isMarketON, FolderIDs, diction))
+            worker = Thread(target=objpEd.start, args=(q, results, isMarketON, diction))#  FolderIDs,
             worker.setDaemon(True)  # setting threads as "daemon" allows main program to
             # exit eventually even if these dont finish
             # correctly.
@@ -182,10 +204,10 @@ if __name__ == '__main__':
         print('Check Program for errors')
 
     #Upload DB file at the end of the day
-    file_id = objMain.objGAPI.search_file(service, config.DB_Name, 'mime_type', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
-    if file_id != 0:
-        objMain.objGAPI.delete_file(service, file_id)
-    objMain.objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name, '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
+    # file_id = objMain.objGAPI.search_file(service, config.DB_Name, 'mime_type', '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
+    # if file_id != 0:
+    #     objMain.objGAPI.delete_file(service, file_id)
+    # objMain.objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name, '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
 
 
 # obj = MainEdle()
