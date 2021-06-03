@@ -176,7 +176,7 @@ class ProcessEd(threading.Thread):
                             strcurrentTime = strcurrentTime.replace(':', '.')
                             #print("else====vala ==strcurrentTime",strcurrentTime)
                             #if float(strcurrentTime) > float(15.30):
-                            if float(strcurrentTime) < float(15.30):
+                            if float(strcurrentTime) > float(15.30):
                                 print('Market is not ON. Try tomorrow or change isMarketON flag')
                                 exd = expDate.replace(' ', '_')
                                 table_name = config.TableName + exd
@@ -214,7 +214,7 @@ class ProcessEd(threading.Thread):
                         strcurrentTime = strcurrentTime.replace(':', '.')
                         #print("third====vala ==strcurrentTime", strcurrentTime)
                         #if float(strcurrentTime) > float(15.30):
-                        if float(strcurrentTime) < float(15.30):
+                        if float(strcurrentTime) > float(15.30):
                             print('Market is not ON. Try tomorrow or change isMarketON flag')
                             break
                         ScrapedFor = work[1]
