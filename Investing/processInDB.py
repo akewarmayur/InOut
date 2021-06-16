@@ -165,7 +165,7 @@ class ProcessIn:
                         t1 = time.time()
                         strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
                         strcurrentTime = strcurrentTime.replace(':', '.')
-                        if float(strcurrentTime) < float(15.30):
+                        if float(strcurrentTime) > float(15.30):
                             print('Market is not ON. Try tomorrow or change isMarketON flag')
                             break
                         for i, item in enumerate(resolutions_list):
