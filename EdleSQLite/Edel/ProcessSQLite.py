@@ -24,8 +24,8 @@ class ProcessEd():
             print('Exception in Edle Scrapping Process:', e)
             return False
 
-    def start(self, symbol_list, EDStocks, EDIndicesW, conn):
-        if config.MarketFlag == True:
+    def start(self, symbol_list, EDStocks, EDIndicesW, conn, MarketFlag):
+        if MarketFlag == 'True':
             iterations = 1
             while True:
                 s = time.time()

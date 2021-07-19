@@ -39,21 +39,12 @@ class MainEdle:
 
 
 if __name__ == '__main__':
-    # my_parser = argparse.ArgumentParser()
-    # # jiten,
-    # my_parser.add_argument('--machine_name', action='store', type=str, required=True)
-    # my_parser.add_argument('--env', action='store', type=str, required=True)
-    # my_parser.add_argument('--sesRestart', action='store', type=str, required=True)
-    # args = my_parser.parse_args()
-    q = Queue(maxsize=0)
-    sy_list = ['stocks', 'UPLOAD_THREAD']
-    num_theads = len(sy_list)
-    # Populating Queue with tasks
-    results = [{} for x in sy_list]
-    # load up the queue with the urls to fetch and the index for each job (as a tuple):
-    for i in range(len(sy_list)):
-        # need the index and the url in each queue item.
-        q.put((i, sy_list[i]))
+    my_parser = argparse.ArgumentParser()
+    my_parser.add_argument('--MarketON', action='store', type=str, required=True)
+    args = my_parser.parse_args()
+
+    MarketFlag = args.MarketON
+
 
     objGAPI = GoogleAPI()
     objpEd = ProcessEd()
@@ -68,17 +59,8 @@ if __name__ == '__main__':
     print(symbol_list)
     conn = objMain.objDBOP.create_connection()
     print("Connection started====")
-    import time
-    # for i in range(num_theads):
-    #     worker = Thread(target=objpEd.start, args=(q, results, symbol_list, EDStocks, EDIndicesW, conn))
-    #     worker.setDaemon(True)  # setting threads as "daemon" allows main program to
-    #     # exit eventually even if these dont finish
-    #     # correctly.
-    #     worker.start()
-    #     time.sleep(1)
-    #     # now we wait until the queue has been processed
-    # q.join()
-    objpEd.start(symbol_list, EDStocks, EDIndicesW, conn)
+
+    objpEd.start(symbol_list, EDStocks, EDIndicesW, conn, MarketFlag)
 
 
 
