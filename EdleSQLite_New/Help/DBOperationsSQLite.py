@@ -89,20 +89,21 @@ class DatabaseOp:
         DB_FILE = os.getcwd() + '/DB/' + config.DB_Name
         conn = None
         try:
-            conn = sqlite3.connect(DB_FILE, timeout=50)
+            conn = sqlite3.connect(DB_FILE, timeout=100)
             return conn
         except Error as e:
             print(e)
 
         return conn
 
-    def create_table(self, conn, table_name):
+    def create_table(self,table_name):
         """ create a table from the create_table_sql statement
         :param conn: Connection object
         :param create_table_sql: a CREATE TABLE statement
         :return:
         """
-
+        conn = self.create_connection()
+        c = conn.cursor()
         create_table_sql = ''' CREATE TABLE IF NOT EXISTS {}(
                                                            id INTEGER PRIMARY KEY AUTOINCREMENT,  
                                                            ScrapedDate date NOT NULL,
@@ -119,15 +120,14 @@ class DatabaseOp:
                                                        );'''.format(table_name)
 
         try:
-            c = conn.cursor()
+
             c.execute(create_table_sql)
-            c.close()
-            #print("Table created successfully")
+
         except Error as e:
             print(e)
-
-
-
+        finally:
+            c.close()
+            conn.close()
 
     # def checkInsertedRecords(self, conn, DateTime, Symbol, Resolution):
     #     cur = conn.cursor()
@@ -136,24 +136,26 @@ class DatabaseOp:
     #     rows = cur.fetchall()
     #     return rows
 
-    def insert(self, conn, ScrapedDate, ScripName, StrikePrice, OptionType, StrTradeDateTime,
+    def insert(self, ScrapedDate, ScripName, StrikePrice, OptionType, StrTradeDateTime,
                TradeDateTime, OI, COI, IV, VOL,SpotPriceVal, table_name):
 
         # insert_table_sql = """INSERT INTO {} (ScrapedDate, ScripName,StrikePrice,OptionType,StrTradeDateTime,
         #                                    TradeDateTime,OI, COI, IV, VOL)
         #                                  VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""".format(table_name)
-
+        conn = self.create_connection()
+        c = conn.cursor()
         insert_table_sql = """INSERT INTO {} (ScrapedDate, ScripName,StrikePrice,OptionType,StrTradeDateTime,
                             TradeDateTime, OI, COI, IV, VOL,SpotPrice)
                           VALUES(?,?,?,?,?,?,?,?,?,?,?)""".format(table_name)
         try:
             queryparameter = ScrapedDate, ScripName, StrikePrice, OptionType, StrTradeDateTime, TradeDateTime, OI, COI, IV, VOL,SpotPriceVal
-            c = conn.cursor()
             c.execute(insert_table_sql, queryparameter)
             conn.commit()
-            # print("records inserted successfully")
         except Error as e:
             print(e)
+        finally:
+            c.close()
+            conn.close()
 
     # #
     # if __name__ == '__main__':

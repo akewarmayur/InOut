@@ -15,10 +15,10 @@ obj=DatabaseOp()
 
 class ProcessEd():
 
-    def process(self, symbol, EDStocks, EDIndicesW, conn,stprice):
+    def process(self, symbol, EDStocks, EDIndicesW, stprice):
         objScrap = ScrapData()
         try:
-            status = objScrap.start_scraping(symbol, EDStocks, EDIndicesW, conn,stprice)
+            status = objScrap.start_scraping(symbol, EDStocks, EDIndicesW, stprice)
             if status == True:
                 return True
             else:
@@ -32,14 +32,14 @@ class ProcessEd():
     #     dt = parse(dt)
     #     return dt.strftime('%d %b %Y')
 
-    def gen_table(self, conn, stocksORindicesExpiryDates):
+    def gen_table(self,stocksORindicesExpiryDates):
         try:
             for dt in stocksORindicesExpiryDates:
                 # dt = dt.split(' ')
                 # dt[1] = dt[1][0:3]
                 # dt= ' '.join(dt)
                 dt = dt.replace(' ', '_')
-                obj.create_table(conn, config.TableName + dt)
+                obj.create_table(config.TableName + dt)
         except Exception as e:
             print('Exception in creating Table:', e)
 
@@ -153,7 +153,7 @@ class ProcessEd():
                 return stprice
 
 
-    def start(self, symbol_list,conn, MarketFlag):
+    def start(self, symbol_list,MarketFlag):
         before5daysfromtodaydate = self.cnvNumberWithDateMinus5(5)
         After5daysfromtodaydate = self.cnvNumberWithDatePlus5(5)
         if MarketFlag == 'True':
@@ -174,34 +174,12 @@ class ProcessEd():
                         #print(row['Symbol'], row['Expiry Date'])
                         expiry_lst = []
                         expiry_lst.append(row['Expiry Date'])
-                        self.gen_table(conn, expiry_lst)
+                        self.gen_table(expiry_lst)
                         stprice = self.parse_url(row['Pid'], before5daysfromtodaydate, After5daysfromtodaydate)
-                        status = self.process(row['Symbol'], expiry_lst, expiry_lst, conn, stprice)
-                # for symbol in symbol_list:
-                #     if float(strcurrentTime) > float(15.30):
-                #         print('Market is not ON. Try tomorrow or change isMarketON flag')
-                #         break
-                #     else:
-                #         status = self.process(symbol, EDStocks, EDIndicesW, conn)
+                        status = self.process(row['Symbol'], expiry_lst, expiry_lst,stprice)
+
                 if float(strcurrentTime) > float(15.30):
                     break
-                # end = int(time.time() - start)
-                # iterations += 1
-                # print("time_taken==", end)
-                # if end <= config.TIME_SLEEP:
-                #     rows = config.TIME_SLEEP - end
-                #     objGAPI = GoogleAPI()
-                #     service = objGAPI.intiate_gdAPI()
-                #     file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type',
-                #                                   '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
-                #     if file_id != 0:
-                #         objGAPI.delete_file(service, file_id)
-                #     objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
-                #                         '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
-                #     time.sleep(rows)
-                # if s - config.TableName <= 0:
-
-            # return True
         else:
             currentDateTime = datetime.datetime.now(timezone('Asia/Calcutta'))
             #print('Time Now: ', currentDateTime)
@@ -214,18 +192,10 @@ class ProcessEd():
                 #print(row['Symbol'], row['Expiry Date'])
                 expiry_lst =[]
                 expiry_lst.append(row['Expiry Date'])
-                self.gen_table(conn,expiry_lst)
+                self.gen_table(expiry_lst)
                 stprice = self.parse_url(row['Pid'],before5daysfromtodaydate,After5daysfromtodaydate)
-                status = self.process(row['Symbol'], expiry_lst, expiry_lst, conn,stprice)
+                status = self.process(row['Symbol'], expiry_lst, expiry_lst, stprice)
 
-        objGAPI = GoogleAPI()
-        service = objGAPI.intiate_gdAPI()
-        file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type',
-                                      '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
-        if file_id != 0:
-            objGAPI.delete_file(service, file_id)
-        objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
-                            '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
 
         return True
 

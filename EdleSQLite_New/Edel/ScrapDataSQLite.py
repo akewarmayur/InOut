@@ -62,19 +62,7 @@ class ScrapData:
 
 
 
-    def start_scraping(self, symbol, EDStocks, EDIndicesW, conn,stprice):
-        cur = conn.cursor()
-        # EDStocksd = EDStocks[0].split(' ')
-        # EDStocksd[1] = EDStocksd[1][0:3]
-        # EDStocksd = ' '.join(EDStocksd)
-        # EDStocks = EDStocksd.replace(' ', '_')
-        # exdate=EDStocks
-        # EDStocks =[]
-        # EDStocks =[]
-        # EDStocks.append(exdate)
-        #
-        # EDIndicesW= EDStocks
-
+    def start_scraping(self, symbol, EDStocks, EDIndicesW, stprice):
 
         currentDate = str(datetime.datetime.now(timezone('Asia/Calcutta'))).split(' ')[0]
         if symbol == 'FINNIFTY' or symbol == 'BANKNIFTY' or symbol == 'NIFTY':
@@ -112,7 +100,7 @@ class ScrapData:
                         IV = j['ceQt']['ltpivfut']
                         VOL = j['ceQt']['vol']
                         COI = float(COI)
-                        self.objDB.insert(conn, currentDate, symbol, strikePrice, optionType, strcurrentDateTime, currentDateTime,
+                        self.objDB.insert(currentDate, symbol, strikePrice, optionType, strcurrentDateTime, currentDateTime,
                                           OI, COI, IV, VOL,stPrice, table_name)
                         ctr = ctr + 1
 
@@ -126,13 +114,19 @@ class ScrapData:
                         IV = j['peQt']['ltpivfut']
                         VOL = j['peQt']['vol']
                         COI = float(COI)
-                        self.objDB.insert(conn, currentDate, symbol, strikePrice, optionType, strcurrentDateTime,
+                        self.objDB.insert(currentDate, symbol, strikePrice, optionType, strcurrentDateTime,
                                           currentDateTime, OI, COI, IV, VOL,stPrice, table_name)
                 query = "SELECT StrTradeDateTime FROM "+table_name+" WHERE ScripName='"+symbol+"' AND ScrapedDate='"+currentDate+"' ORDER BY StrTradeDateTime DESC LIMIT 1"
+                conn = self.objDB.create_connection()
+                cur= conn.cursor()
                 cur.execute(query)
                 rows = cur.fetchall()
+                cur.close()
+                conn.close()
+
                 if len(rows) == 0:
                     return False
+
             except Exception as e:
                 # Log
                 f = open("error.txt", "a")
@@ -141,8 +135,3 @@ class ScrapData:
                 print("In Exception ", e)
 
         return True
-
-# obj11 = ScrapData()
-# obj11.parse_url('BANKNIFTY')
-# d = obj.get_expiry_dates()
-# print(d)

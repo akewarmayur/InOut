@@ -75,9 +75,9 @@ if __name__ == '__main__':
     ####### Reading data from drive
     isMarketON, df = objMain.get_symbol_list_from_drive(McName)
     #status = self.process(symbol, EDStocks, EDIndicesW, conn)
-    conn = objMain.objDBOP.create_connection()
+    #conn = objMain.objDBOP.create_connection()
     print("Execution started====")
-    objpEd.start(df, conn, MarketFlag)
+    objpEd.start(df,MarketFlag)
 
 
 
