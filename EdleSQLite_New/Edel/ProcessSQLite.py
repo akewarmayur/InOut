@@ -1,0 +1,199 @@
+from Edel.ScrapDataSQLite import ScrapData
+import time
+from pytz import timezone
+import datetime
+import config
+import warnings
+import os
+from Edel.gAPISQLite import GoogleAPI
+warnings.filterwarnings("ignore")
+from Help.DBOperationsSQLite import DatabaseOp
+import requests
+import json
+
+obj=DatabaseOp()
+
+class ProcessEd():
+
+    def process(self, symbol, EDStocks, EDIndicesW, conn,stprice):
+        objScrap = ScrapData()
+        try:
+            status = objScrap.start_scraping(symbol, EDStocks, EDIndicesW, conn,stprice)
+            if status == True:
+                return True
+            else:
+                print(f"Scrapping df empty for : {symbol}")
+                return False
+        except Exception as e:
+            print('Exception in Edle Scrapping Process:', e)
+            return False
+
+    # def change_format(self,dt):
+    #     dt = parse(dt)
+    #     return dt.strftime('%d %b %Y')
+
+    def gen_table(self, conn, stocksORindicesExpiryDates):
+        try:
+            for dt in stocksORindicesExpiryDates:
+                # dt = dt.split(' ')
+                # dt[1] = dt[1][0:3]
+                # dt= ' '.join(dt)
+                dt = dt.replace(' ', '_')
+                obj.create_table(conn, config.TableName + dt)
+        except Exception as e:
+            print('Exception in creating Table:', e)
+
+    def get_token(self):
+        url = 'https://in.investing.com/'
+        # print(url)
+        USER_AGENT = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+        response = requests.get(url, headers=USER_AGENT)
+        res = response.text[5168:5209].split('"')
+        for row in res:
+            if len(row) > 20:
+                token = row.isalnum()
+                if token == True:
+                    return row
+                    break
+                else:
+                    time.sleep(5)
+
+    def cnvNumberWithDateMinus5(self,numofDays):
+        tod = datetime.datetime.now()
+        date_time = tod.strftime("%Y-%m-%d") + " 12:00:00"
+        backdate = datetime.timedelta(days=numofDays)
+        next_date_time = tod - backdate
+        #print("minus time :", next_date_time)
+        next_datetime1 = next_date_time.strftime("%Y-%m-%d") + " 12:00:00"
+        #print("next date time :", next_datetime1)
+        element = datetime.datetime.strptime(next_datetime1, "%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.datetime.timestamp(element)
+        #print("Minus date=========================", int(timestamp))
+        return int(timestamp)
+
+    def cnvNumberWithDatePlus5(self,numofDays):
+        tod = datetime.datetime.now()
+        date_time = tod.strftime("%Y-%m-%d") + " 12:00:00"
+        backdate = datetime.timedelta(days=numofDays)
+        next_date_time = tod + backdate
+        #print("Add time :", next_date_time)
+        next_datetime1 = next_date_time.strftime("%Y-%m-%d") + " 12:00:00"
+        #print("next date time :", next_datetime1)
+        element = datetime.datetime.strptime(next_datetime1, "%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.datetime.timestamp(element)
+        #print("Plus date=========================", int(timestamp))
+        return int(timestamp)
+
+    def parse_url(self,pid,bf5date,af5date):
+        try:
+            #### URL='https://tvc4.investing.com/3c56685e0bcd1192bf342d953e8cbb54/1626943211/56/56/23/history?symbol=17950&resolution=1D&from=1626503400&to=1627367400'
+            URL = 'https://tvc4.investing.com/'+str(self.get_token())+'/1626943211/56/56/23/history?symbol='+str(pid)+'&resolution=1D&from='+str(bf5date)+'&to='+str(af5date)+''
+            #print(URL)
+            #URL = 'https://tvc4.investing.com/bb14c2c9b28e3fe16546d6ca55ce3dca/1626856516/1/1/8/quotes?symbols=NSE%20%3A'+str(stockName)
+            USER_AGENT = {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+
+            response = requests.get(URL, headers=USER_AGENT)
+            #print(URL)
+            if response.text =='null' or response.text =='None' or response.text =='':
+                time.sleep(20)
+                response = requests.get(URL, headers=USER_AGENT)
+                response = json.loads(response.text)
+            else:
+                response= json.loads(response.text)
+
+            closingValue = round(response['c'][-1],2)
+            print(f'=====Pid===== {pid}===========lp(lower price)====== {closingValue}')
+            return closingValue
+        except Exception as e:
+            print("Token issue =======",)
+
+    def start(self, symbol_list,conn, MarketFlag):
+        before5daysfromtodaydate = self.cnvNumberWithDateMinus5(5)
+        After5daysfromtodaydate = self.cnvNumberWithDatePlus5(5)
+        if MarketFlag == 'TRUE':
+            iterations = 1
+            while True:
+                s = time.time()
+                #print('Iterations: ', iterations)
+                currentDateTime = datetime.datetime.now(timezone('Asia/Calcutta'))
+                #print('Time Now: ', currentDateTime)
+                strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+                strcurrentTime = strcurrentTime.replace(':', '.')
+                start = time.time()
+                for index, row in symbol_list.iterrows():
+                    if float(strcurrentTime) > float(15.30):
+                        print('Market is not ON. Try tomorrow or change isMarketON flag')
+                        break
+                    else:
+                        print(row['Symbol'], row['Expiry Date'])
+                        expiry_lst = []
+                        expiry_lst.append(row['Expiry Date'])
+                        self.gen_table(conn, expiry_lst)
+                        stprice = self.parse_url(row['Pid'], before5daysfromtodaydate, After5daysfromtodaydate)
+                        status = self.process(row['Symbol'], expiry_lst, expiry_lst, conn, stprice)
+                # for symbol in symbol_list:
+                #     if float(strcurrentTime) > float(15.30):
+                #         print('Market is not ON. Try tomorrow or change isMarketON flag')
+                #         break
+                #     else:
+                #         status = self.process(symbol, EDStocks, EDIndicesW, conn)
+                if float(strcurrentTime) > float(15.30):
+                    break
+                end = int(time.time() - start)
+                iterations += 1
+                print("time_taken==", end)
+                if end <= config.TIME_SLEEP:
+                    rows = config.TIME_SLEEP - end
+                    objGAPI = GoogleAPI()
+                    service = objGAPI.intiate_gdAPI()
+                    file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type',
+                                                  '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
+                    if file_id != 0:
+                        objGAPI.delete_file(service, file_id)
+                    objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
+                                        '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
+                    time.sleep(rows)
+                # if s - config.TableName <= 0:
+
+            # return True
+        else:
+            currentDateTime = datetime.datetime.now(timezone('Asia/Calcutta'))
+            #print('Time Now: ', currentDateTime)
+            strcurrentTime = datetime.datetime.now(timezone('Asia/Calcutta')).strftime('%H:%M')
+            strcurrentTime = strcurrentTime.replace(':', '.')
+            start = time.time()
+            # for symbol in symbol_list:
+            #     status = self.process(symbol, EDStocks, EDIndicesW, conn)
+            for index, row in symbol_list.iterrows():
+                #print(row['Symbol'], row['Expiry Date'])
+                expiry_lst =[]
+                expiry_lst.append(row['Expiry Date'])
+                self.gen_table(conn,expiry_lst)
+                stprice = self.parse_url(row['Pid'],before5daysfromtodaydate,After5daysfromtodaydate)
+                status = self.process(row['Symbol'], expiry_lst, expiry_lst, conn,stprice)
+
+        objGAPI = GoogleAPI()
+        service = objGAPI.intiate_gdAPI()
+        file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type',
+                                      '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
+        if file_id != 0:
+            objGAPI.delete_file(service, file_id)
+        objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
+                            '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
+
+        return True
+
+
+
+#
+# obj = ProcessEd()
+# name_of_file = 'NIFTY_29_Apr_2021.csv'
+# previous_df = pd.read_csv(os.getcwd() + '/d_csv/' + name_of_file, index_col=0)
+# print(previous_df.head(1))
+# df_now = pd.read_csv(os.getcwd() + '/csv/' + name_of_file, index_col=0)
+# print(df_now.head(1))
+# d = obj.concate(previous_df, df_now)
+# print(d.head())
+# print(d.tail())
