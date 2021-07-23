@@ -56,8 +56,7 @@ class ProcessEd():
                 if token == True:
                     return row
                     break
-                else:
-                    time.sleep(5)
+
 
     def cnvNumberWithDateMinus5(self,numofDays):
         tod = datetime.datetime.now()
