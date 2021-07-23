@@ -87,27 +87,59 @@ class ProcessEd():
 
     def parse_url(self,pid,bf5date,af5date):
         try:
+            readToken = ""
+            with open("token.txt", "r+") as f:
+                readToken = f.read()  # read everything in the file
+                #print("==========================================",readToken)
+
+            URL = 'https://tvc4.investing.com/' + str(readToken) + '/1626943211/56/56/23/history?symbol=' + str(
+                pid) + '&resolution=1D&from=' + str(bf5date) + '&to=' + str(af5date) + ''
             #### URL='https://tvc4.investing.com/3c56685e0bcd1192bf342d953e8cbb54/1626943211/56/56/23/history?symbol=17950&resolution=1D&from=1626503400&to=1627367400'
-            URL = 'https://tvc4.investing.com/'+str(self.get_token())+'/1626943211/56/56/23/history?symbol='+str(pid)+'&resolution=1D&from='+str(bf5date)+'&to='+str(af5date)+''
-            #print(URL)
+            #URL = 'https://tvc4.investing.com/'+str(self.get_token())+'/1626943211/56/56/23/history?symbol='+str(pid)+'&resolution=1D&from='+str(bf5date)+'&to='+str(af5date)+''
             #URL = 'https://tvc4.investing.com/bb14c2c9b28e3fe16546d6ca55ce3dca/1626856516/1/1/8/quotes?symbols=NSE%20%3A'+str(stockName)
             USER_AGENT = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 
             response = requests.get(URL, headers=USER_AGENT)
             #print(URL)
-            if response.text =='null' or response.text =='None' or response.text =='':
-                time.sleep(20)
+            if response.text =='null' or response.text =='None' or response.text == '':
+                token= self.get_token()
+                ## write
+                with open("token.txt", "r+") as f:
+                    f.seek(0)  # rewind
+                    token = self.get_token()
+                    f.write(token)
+                    print("New token============",token)
+                ### read
+                readToken = ""
+                with open("token.txt", "r+") as f:
+                    readToken = f.read()  # read everything in the file
+                    #print("==========================================", readToken)
+
+                URL = 'https://tvc4.investing.com/' + str(readToken) + '/1626943211/56/56/23/history?symbol=' + str(
+                    pid) + '&resolution=1D&from=' + str(bf5date) + '&to=' + str(af5date) + ''
+
                 response = requests.get(URL, headers=USER_AGENT)
                 response = json.loads(response.text)
             else:
                 response= json.loads(response.text)
 
             closingValue = round(response['c'][-1],2)
-            print(f'=====Pid===== {pid}===========lp(lower price)====== {closingValue}')
+            print(f'=====Pid===== {pid}===========lp(list price)====== {closingValue}')
             return closingValue
         except Exception as e:
-            print("Token issue =======",)
+            pass
+
+    def regentakon(self,pid, before5daysfromtodaydate, After5daysfromtodaydate):
+        for i in range(10):
+            print("Regenetoken=======")
+            time.sleep(10)
+            stprice = self.parse_url(pid, before5daysfromtodaydate, After5daysfromtodaydate)
+            if stprice == "" or stprice == "null" or stprice == "None" or stprice == "None":
+                continue
+            else:
+                return stprice
+
 
     def start(self, symbol_list,conn, MarketFlag):
         before5daysfromtodaydate = self.cnvNumberWithDateMinus5(5)
@@ -127,7 +159,7 @@ class ProcessEd():
                         print('Market is not ON. Try tomorrow or change isMarketON flag')
                         break
                     else:
-                        print(row['Symbol'], row['Expiry Date'])
+                        #print(row['Symbol'], row['Expiry Date'])
                         expiry_lst = []
                         expiry_lst.append(row['Expiry Date'])
                         self.gen_table(conn, expiry_lst)
