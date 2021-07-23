@@ -59,7 +59,7 @@ if __name__ == '__main__':
     my_parser = argparse.ArgumentParser()
     my_parser.add_argument('--MarketON', action='store', type=str, required=True)
     my_parser.add_argument('--MachineName', action='store', type=str, required=True)
-    # python StartSQlite.py --MarketON False --MachineName U001
+    # python StartSQlite.py --MarketON True --MachineName U001
     args = my_parser.parse_args()
     MarketFlag = args.MarketON
     McName = args.MachineName
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     #status = self.process(symbol, EDStocks, EDIndicesW, conn)
     conn = objMain.objDBOP.create_connection()
     print("Execution started====")
-    objpEd.start(df, conn, isMarketON)
+    objpEd.start(df, conn, MarketFlag)
 
 
 

@@ -112,7 +112,7 @@ class ProcessEd():
     def start(self, symbol_list,conn, MarketFlag):
         before5daysfromtodaydate = self.cnvNumberWithDateMinus5(5)
         After5daysfromtodaydate = self.cnvNumberWithDatePlus5(5)
-        if MarketFlag == 'TRUE':
+        if MarketFlag == 'True':
             iterations = 1
             while True:
                 s = time.time()
