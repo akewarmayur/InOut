@@ -87,9 +87,14 @@ class ProcessEd():
     def parse_url(self,pid,bf5date,af5date):
         try:
             readToken = ""
-            with open("token.txt", "r+") as f:
-                readToken = f.read()  # read everything in the file
+            try:
+
+                with open("token.txt", "r+") as f:
+                    readToken = f.read()  # read everything in the file
+                    f.close()
+            except Exception as e:
                 f.close()
+                print("Reading file error===",e)
                 #print("==========================================",readToken)
 
             URL = 'https://tvc4.investing.com/' + str(readToken) + '/1626943211/56/56/23/history?symbol=' + str(
@@ -100,18 +105,23 @@ class ProcessEd():
             USER_AGENT = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 
-            response = requests.get(URL, headers=USER_AGENT)
+            response = requests.get(URL, headers=USER_AGENT,timeout=(10,200))
             #print(URL)
             if response.text =='null' or response.text =='None' or response.text == '':
-                token= self.get_token()
                 ## write
-                with open("token.txt", "r+") as f:
-                    f.seek(0)  # rewind
-                    token = self.get_token()
-                    f.write(token)
+
+                try:
+
+                    with open("token.txt", "r+") as f:
+                        f.seek(0)  # rewind
+                        token = self.get_token()
+                        f.write(token)
+                        f.close()
+                        print("New token============",token)
+                except Exception as e:
                     f.close()
-                    print("New token============",token)
-                ### read
+                    print("Reading file error===", e)
+                    ### read
                 readToken = ""
                 with open("token.txt", "r+") as f:
                     readToken = f.read()  # read everything in the file
@@ -121,7 +131,7 @@ class ProcessEd():
                 URL = 'https://tvc4.investing.com/' + str(readToken) + '/1626943211/56/56/23/history?symbol=' + str(
                     pid) + '&resolution=1D&from=' + str(bf5date) + '&to=' + str(af5date) + ''
 
-                response = requests.get(URL, headers=USER_AGENT)
+                response = requests.get(URL, headers=USER_AGENT,timeout=(10,200))
                 response = json.loads(response.text)
             else:
                 response= json.loads(response.text)
@@ -175,20 +185,20 @@ class ProcessEd():
                 #         status = self.process(symbol, EDStocks, EDIndicesW, conn)
                 if float(strcurrentTime) > float(15.30):
                     break
-                end = int(time.time() - start)
-                iterations += 1
-                print("time_taken==", end)
-                if end <= config.TIME_SLEEP:
-                    rows = config.TIME_SLEEP - end
-                    objGAPI = GoogleAPI()
-                    service = objGAPI.intiate_gdAPI()
-                    file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type',
-                                                  '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
-                    if file_id != 0:
-                        objGAPI.delete_file(service, file_id)
-                    objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
-                                        '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
-                    time.sleep(rows)
+                # end = int(time.time() - start)
+                # iterations += 1
+                # print("time_taken==", end)
+                # if end <= config.TIME_SLEEP:
+                #     rows = config.TIME_SLEEP - end
+                #     objGAPI = GoogleAPI()
+                #     service = objGAPI.intiate_gdAPI()
+                #     file_id = objGAPI.search_file(service, config.DB_Name, 'mime_type',
+                #                                   '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', True)
+                #     if file_id != 0:
+                #         objGAPI.delete_file(service, file_id)
+                #     objGAPI.upload_file(service, config.DB_Name, os.getcwd() + '/DB/' + config.DB_Name,
+                #                         '1llZZacQjhf2iNPjjpCBSSD4AdKFc5Con', 'application/vnd.sqlite3')
+                #     time.sleep(rows)
                 # if s - config.TableName <= 0:
 
             # return True
