@@ -90,6 +90,7 @@ class ProcessEd():
             readToken = ""
             with open("token.txt", "r+") as f:
                 readToken = f.read()  # read everything in the file
+                f.close()
                 #print("==========================================",readToken)
 
             URL = 'https://tvc4.investing.com/' + str(readToken) + '/1626943211/56/56/23/history?symbol=' + str(
@@ -109,11 +110,13 @@ class ProcessEd():
                     f.seek(0)  # rewind
                     token = self.get_token()
                     f.write(token)
+                    f.close()
                     print("New token============",token)
                 ### read
                 readToken = ""
                 with open("token.txt", "r+") as f:
                     readToken = f.read()  # read everything in the file
+                    f.close()
                     #print("==========================================", readToken)
 
                 URL = 'https://tvc4.investing.com/' + str(readToken) + '/1626943211/56/56/23/history?symbol=' + str(
