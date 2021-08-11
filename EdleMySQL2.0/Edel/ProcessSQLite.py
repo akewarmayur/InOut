@@ -137,14 +137,14 @@ class ProcessEd():
                 response= json.loads(response.text)
 
             closingValue = round(response['c'][-1],2)
-            print(f'=====Pid===== {pid}===========lp(list price)====== {closingValue}')
+            #print(f'=====Pid===== {pid}===========lp(list price)====== {closingValue}')
             return closingValue
         except Exception as e:
             pass
 
     def regentakon(self,pid, before5daysfromtodaydate, After5daysfromtodaydate):
         for i in range(10):
-            print("Regenetoken=======")
+            #print("Regenetoken=======")
             time.sleep(10)
             stprice = self.parse_url(pid, before5daysfromtodaydate, After5daysfromtodaydate)
             if stprice == "" or stprice == "null" or stprice == "None" or stprice == "None":

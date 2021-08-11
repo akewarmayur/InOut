@@ -67,7 +67,8 @@ class ScrapData:
 
         currentDate = str(datetime.datetime.now(timezone('Asia/Calcutta'))).split(' ')[0]
         if symbol == 'FINNIFTY' or symbol == 'BANKNIFTY' or symbol == 'NIFTY':
-            EXD = EDStocks + EDIndicesW
+            #EXD = EDStocks + EDIndicesW
+            EXD = EDStocks
         else:
             EXD = EDStocks
         for expiryDate in EXD:
@@ -126,8 +127,8 @@ class ScrapData:
 
                 t= time.time()
                 self.objDB.dpinsert(bulk_insert, table_name)
-                print('done in second',time.time()-t)
-                print("Count===",len(bulk_insert))
+                #print('done in second',time.time()-t)
+                #print("Count===",len(bulk_insert))
                 query = "SELECT StrTradeDateTime FROM "+table_name+" WHERE ScripName='"+symbol+"' AND ScrapedDate='"+currentDate+"' ORDER BY StrTradeDateTime DESC LIMIT 1"
                 #print("query==",query)
                 conn = self.objDB.create_connection()

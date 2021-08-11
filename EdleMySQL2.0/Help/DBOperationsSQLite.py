@@ -116,22 +116,21 @@ class DatabaseOp:
         create_table_sql = ''' CREATE TABLE IF NOT EXISTS {}(
                                                            id INTEGER PRIMARY KEY AUTO_INCREMENT,  
                                                            ScrapedDate date NOT NULL,
-                                                           ScripName TEXT NOT NULL,
+                                                           ScripName varchar(12) NOT NULL,
                                                            StrikePrice float NOT NULL,
-                                                           OptionType TEXT NOT NULL,
-                                                           StrTradeDateTime TEXT NOT NULL,
+                                                           OptionType varchar(2) NOT NULL,
+                                                           StrTradeDateTime varchar(6) NOT NULL,
                                                            TradeDateTime datetime NOT NULL, 
                                                            OI float NOT NULL,
                                                            COI float NOT NULL,
                                                            IV float NOT NULL,
                                                            VOL float NOT NULL,
-                                                           SpotPrice float
+                                                           SpotPrice float,
+                                                           MinuteCOI float Null
                                                        );'''.format(table_name.lower())
 
         try:
-
             c.execute(create_table_sql)
-
         except Error as e:
             print(e)
         finally:
