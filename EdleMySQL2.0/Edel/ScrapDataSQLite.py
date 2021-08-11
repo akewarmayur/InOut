@@ -11,6 +11,7 @@ from Help.DBOperationsSQLite import DatabaseOp
 import time
 warnings.filterwarnings("ignore")
 import json
+import time
 
 class ScrapData:
     def __init__(self):
@@ -123,7 +124,9 @@ class ScrapData:
                         VOL, stPrice)
                         bulk_insert.append(addpara)
 
+                t= time.time()
                 self.objDB.dpinsert(bulk_insert, table_name)
+                print('done in second',time.time()-t)
                 print("Count===",len(bulk_insert))
                 query = "SELECT StrTradeDateTime FROM "+table_name+" WHERE ScripName='"+symbol+"' AND ScrapedDate='"+currentDate+"' ORDER BY StrTradeDateTime DESC LIMIT 1"
                 #print("query==",query)
