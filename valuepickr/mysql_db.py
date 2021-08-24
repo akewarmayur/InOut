@@ -15,7 +15,7 @@ def create_database():
     cursorObject = dataBase.cursor()
     # creating database
     cursorObject.execute("CREATE DATABASE valuepickrDB")
-    print("database created")
+    #print("database created")
     return
 
 def connect2Mysql(inputDict=LOCALMYSQL):

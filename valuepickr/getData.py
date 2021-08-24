@@ -5,9 +5,13 @@ import time
 import mysql_db as db
 # Import the argparse library
 import argparse
-#from valuepickr.process_links import ValuePickrProcess 
+#from valuepickr.process_links import ValuePickrProcess
 from process_links import ValuePickrProcess
-obj_vp=ValuePickrProcess()
+from webdriver_manager.chrome import ChromeDriverManager
+
+# create object
+obj_vp = ValuePickrProcess()
+
 class ValuePickrGetLinks():
 
     def __init__(self):
@@ -15,7 +19,9 @@ class ValuePickrGetLinks():
         self.chromedriver = os.getcwd() + config.DRIVER_PATH
 
         # create driver object
+        ## link https://stackoverflow.com/questions/60296873/sessionnotcreatedexception-message-session-not-created-this-version-of-chrome/62127806
         self.driver = webdriver.Chrome(self.chromedriver)
+        #self.driver = webdriver.Chrome(ChromeDriverManager().install())
         self.driver.maximize_window()
 
     def close_driver(self):
@@ -47,15 +53,23 @@ class ValuePickrGetLinks():
         containers = self.driver.find_elements_by_class_name(config.DIV_LIST)
         self.driver.find_elements_by_class_name('fps-result')
         self.bottom_down()
-        fps_results = self.driver.find_elements_by_class_name('fps-result')
-        for i in range(1, len(fps_results) + 1):
-            topics = self.driver.find_elements_by_xpath("//*[@id='ember55']/div[" + str(i) + "]/div[2]/div[1]")
-            for topic in topics:
-                lnks = topic.find_element_by_tag_name(config.DIV_LIST_ANCHOR).get_attribute('href')
-                topicTitles = topic.find_element_by_class_name("topic-title").text
-                print(lnks,topicTitles)
-                db.insertTopic(topicTitles, lnks)
-                lnksLst.append((topicTitles,lnks))
+        fps_results = self.driver.find_element_by_class_name('fps-result-entries')
+        fps_results=fps_results.find_elements_by_class_name('fps-result')
+        for fps in fps_results:
+            topicTitles= fps.find_element_by_partial_link_text('a').text
+            lnks= fps.find_element_by_partial_link_text('a').get_attribute('href')
+            print(lnks, topicTitles)
+            db.insertTopic(topicTitles, lnks)
+            lnksLst.append((topicTitles,lnks))
+
+
+            # lnksLst.append((topicTitles,lnks))
+            # for topic in topics:
+            #     lnks = topic.find_element_by_tag_name(config.DIV_LIST_ANCHOR).get_attribute('href')
+            #     topicTitles = topic.find_element_by_class_name("topic-title").text
+            #     print(lnks,topicTitles)
+            #     db.insertTopic(topicTitles, lnks)
+            #     lnksLst.append((topicTitles,lnks))
 
         ## Start parsing
         if len(lnksLst) > 0:
@@ -113,8 +127,8 @@ if __name__ == '__main__':
     args = my_parser.parse_args()
 
     input_date = args.Date
-    ##input_date='2021-05-18'
-    print("input_date=========", input_date)
+    #input_date='2021-08-23'
+    #print("input_date=========", input_date)
     queryParameter = config.QUERY_PARAMETER + input_date
     print(queryParameter)
     obj.run_process(queryParameter)
