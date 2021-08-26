@@ -62,15 +62,8 @@ class ValuePickrGetLinks():
             db.insertTopic(topicTitles, lnks)
             lnksLst.append((topicTitles,lnks))
 
-
-            # lnksLst.append((topicTitles,lnks))
-            # for topic in topics:
-            #     lnks = topic.find_element_by_tag_name(config.DIV_LIST_ANCHOR).get_attribute('href')
-            #     topicTitles = topic.find_element_by_class_name("topic-title").text
-            #     print(lnks,topicTitles)
-            #     db.insertTopic(topicTitles, lnks)
-            #     lnksLst.append((topicTitles,lnks))
-
+        ## lnks="https://forum.valuepickr.com/t/vaibhav-global-back-from-the-dead/960/371"
+        ## lnksLst.append(('Vaibhav Global : Back from the dead', lnks))
         ## Start parsing
         if len(lnksLst) > 0:
             self.topic_processes(lnksLst)
@@ -127,8 +120,7 @@ if __name__ == '__main__':
     args = my_parser.parse_args()
 
     input_date = args.Date
-    #input_date='2021-08-23'
-    #print("input_date=========", input_date)
+    # input_date='2021-08-26'
     queryParameter = config.QUERY_PARAMETER + input_date
     print(queryParameter)
     obj.run_process(queryParameter)

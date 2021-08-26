@@ -68,8 +68,7 @@ class ValuePickrProcess():
             return 1
 
     def run(self,driver,topicid,parameter):
-        print(topicid,parameter)
-        print("------------------")
+        print("====================================================",topicid,parameter)
         driver.get(parameter)
         # To scroll top of the page
         # while True:
@@ -118,32 +117,33 @@ class ValuePickrProcess():
             webclientLst=[]
             crawler_post = driver.find_elements_by_class_name('topic-body')
             for crawler in crawler_post:
-                metas = crawler.find_elements_by_class_name('topic-meta-data')
-                for row in metas:
-                    userName = row.find_element_by_tag_name('a').text
-                    #user_post_date = row.find_element_by_class_name('post-infos').text
-                    user_post_date = row.find_element_by_css_selector('.relative-date').get_attribute('title')
-                    #print(userName,user_post_date)
-                    db.insertUser(userName)
-                    #print("==========")
-                    ## contents
-                cooked = crawler.find_elements_by_css_selector('.contents')
-                for cook in cooked:
-                    user_post_desc = cook.find_element_by_tag_name('div').text
-                    print(user_post_desc)
-                    print("==================================================")
-                    #print(cooked)
-                    ## Add userId
-                    checkUserId = db.getUserDetails(userName)
-                    checkUserId = checkUserId[0][0]
-                    print("UserId=======================",checkUserId)
-                    webclientLst.append((checkUserId,userName, user_post_date,user_post_desc))
-                    #print("===================================================")
+                try:
 
-            SCROLL_PAUSE_TIME = 0.5
+                    metas = crawler.find_elements_by_class_name('topic-meta-data')
+                    for row in metas:
+                        userName = row.find_element_by_tag_name('a').text
+                        print("Username=======",userName)
+                        #user_post_date = row.find_element_by_class_name('post-infos').text
+                        user_post_date = row.find_element_by_css_selector('.relative-date').get_attribute('title')
+                        #print(userName,user_post_date)
+                        db.insertUser(userName)
+                        #print("==========")
+                        ## contents
+                    cooked = crawler.find_elements_by_css_selector('.contents')
+                    for cook in cooked:
+                        user_post_desc = cook.find_element_by_tag_name('div').text
+                        ## Add userId
+                        checkUserId = db.getUserDetails(userName)
+                        checkUserId = checkUserId[0][0]
+                        webclientLst.append((checkUserId,userName, user_post_date,user_post_desc))
+                except Exception as ex:
+                    print("Inner Error ====",ex)
+
+
+            SCROLL_PAUSE_TIME = 2
             # Get scroll height
             last_height = driver.execute_script("return document.body.scrollHeight")
-            print("last_height=========", last_height)
+
             while True:
                 # Scroll down to bottom
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -160,35 +160,42 @@ class ValuePickrProcess():
                 ### topic-body crawler-post
                 crawler_post = driver.find_elements_by_class_name('topic-body')
                 for crawler in crawler_post:
-                    metas = crawler.find_elements_by_class_name('topic-meta-data')
-                    for row in metas:
-                        userName = row.find_element_by_tag_name('a').text
-                        # user_post_date = row.find_element_by_class_name('post-infos').text
-                        user_post_date = driver.find_element_by_css_selector('.relative-date').get_attribute(
-                            'title')
-                        #print(userName, user_post_date)
-                        db.insertUser(userName)
-                        #print("==========")
-                        ## contents
-                    cooked = crawler.find_elements_by_css_selector('.contents')
-                    for cook in cooked:
-                        user_post_desc = cook.find_element_by_tag_name('div').text
-                        print(user_post_desc)
-                        print("==================================================")
-                        # print(cooked)
-                        ## Add userId
-                        checkUserId = db.getUserDetails(userName)
-                        checkUserId = checkUserId[0][0]
-                        webclientLst.append((checkUserId, userName, user_post_date, user_post_desc))
+                    try:
+                        metas = crawler.find_elements_by_class_name('topic-meta-data')
+                        for row in metas:
+                            userName = row.find_element_by_tag_name('a').text
+                            print("Username=======",userName)
+                            # user_post_date = row.find_element_by_class_name('post-infos').text
+                            user_post_date = driver.find_element_by_css_selector('.relative-date').get_attribute(
+                                'title')
+                            #print(userName, user_post_date)
+                            db.insertUser(userName)
+                            #print("==========")
+                            ## contents
+                        cooked = crawler.find_elements_by_css_selector('.contents')
+                        for cook in cooked:
+                            user_post_desc = cook.find_element_by_tag_name('div').text
+                            #print(user_post_desc)
+                            # print("==================================================")
+                            # print(cooked)
+                            ## Add userId
+                            checkUserId = db.getUserDetails(userName)
+                            checkUserId = checkUserId[0][0]
+                            webclientLst.append((checkUserId, userName, user_post_date, user_post_desc))
+                    except Exception as ex2:
+                        print("Inner Exception 2====",ex2)
         except Exception as e:
-            pass
+            print("Error =====",e)
         try:
-
+            print("Total length====",len(webclientLst))
             for row in webclientLst:
                 retndate= db.convvartoDate(row[2])
-                db.insertTopicDiscussion(topicid,row[0],row[3],retndate[0])
+                #disucsstext = row[3].encode('utf-8')
+                disucsstext =row[3].encode('ascii', errors='ignore').decode("utf-8")
+                #print("disucsstext=============", disucsstext)
+                db.insertTopicDiscussion(topicid,row[0],disucsstext,retndate[0])
         except Exception as e:
-            pass
+            print("Error===2=====", e)
 
     # def bottom_down(self):
     #     SCROLL_PAUSE_TIME = 0.5
