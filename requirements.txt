@@ -9,3 +9,4 @@ pymysql
 pandas
 sqlalchemy
 requests
+cryptography
