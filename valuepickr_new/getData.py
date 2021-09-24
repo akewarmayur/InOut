@@ -9,6 +9,7 @@ import argparse
 from process_links import ValuePickrProcess
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 # create object
 obj_vp = ValuePickrProcess()
 
@@ -92,7 +93,7 @@ class ValuePickrGetLinks():
             self.driver.find_element_by_xpath(config.SEARCH_BOX_XPATH).send_keys(parameter)
             self.driver.find_element_by_xpath(config.SEARCH_BOX_BUTTON_CLICK).click()
             lst = self.loopthrough_read_div()
-            print(lst)
+            #print(lst)
         except Exception as e:
             print("Error======", e)
         # driver close
@@ -106,11 +107,33 @@ class ValuePickrGetLinks():
             for topic in topicslst:
                 try:
                     topics = db.getReadTopic(topic[0])
+                    latest_URL_last_count = int(topic[1].split("/")[-1]) ## new url
+                    old_db_URL_last_count = int(topics[0][2].split("/")[-1]) ## old or db url
+
+                    url_link=""
+                    if old_db_URL_last_count == latest_URL_last_count:
+                        url_link = topic[1]
+                        print("No change in URL of {}=============".format(topic[0]))
+                        continue
+                    else:
+                        if old_db_URL_last_count > latest_URL_last_count:
+                            print("No change in URL of {}=============".format(topic[0]))
+                            continue
+                        else:
+                            diff_value_count= latest_URL_last_count-old_db_URL_last_count
+                            if diff_value_count <= 20:
+                                print("No change in URL of {}=============".format(topic[0]))
+                                continue
+                            else:
+                                url_link = topic[1].replace(topic[1].split("/")[-1], str(old_db_URL_last_count))
                     #obj_vp.run(self.driver,topics[0][0], topics[0][2])
-                    num_value= obj_vp.run_with_html_view(topics[0][0], topics[0][2])
-                    url_first = topics[0][2]
-                    url_update = topics[0][2].replace(topics[0][2].split("/")[-1], str(num_value))
-                    db.update_url(url_update,url_first) ## update url
+
+                    num_value= obj_vp.run_with_html_view(topics[0][0], url_link)
+                    #url_first = topics[0][2]
+                    # url_first = url_link
+                    # url_update = topics[0][2].replace(topics[0][2].split("/")[-1], str(num_value))
+                    url_update = url_link.replace(url_link.split("/")[-1], str(num_value))
+                    db.update_url(url_update,topics[0][2]) ## update url
                 except Exception as e:
                     print("inner topic processing error==", e)
         except Exception as e:
